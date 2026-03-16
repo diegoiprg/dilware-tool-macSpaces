@@ -6,7 +6,7 @@ local M = {}
 -- ─────────────────────────────────────────────
 -- Versión
 -- ─────────────────────────────────────────────
-M.VERSION = "2.0.0"
+M.VERSION = "2.1.0"
 
 -- ─────────────────────────────────────────────
 -- Perfiles: orden de aparición en el menú
@@ -75,6 +75,37 @@ M.pomodoro = {
 M.breaks = {
     interval_minutes = 50, -- recordatorio cada N minutos
     enabled          = false, -- desactivado por defecto, el usuario lo activa
+}
+
+-- ─────────────────────────────────────────────
+-- Portapapeles
+-- ─────────────────────────────────────────────
+M.clipboard = {
+    max_entries = 20, -- máximo de entradas en el historial
+}
+
+-- ─────────────────────────────────────────────
+-- Modo presentación
+-- ─────────────────────────────────────────────
+M.presentation = {
+    enable_dnd    = true,  -- activar No Molestar al entrar en modo presentación
+    hide_dock     = true,  -- ocultar el Dock automáticamente
+    hide_desktop  = true,  -- ocultar íconos del escritorio
+}
+
+-- ─────────────────────────────────────────────
+-- Lanzador rápido de apps
+-- Agrega entradas como: { name = "Nombre App", icon = "🚀" }
+-- o simplemente como string: "Nombre App"
+-- ─────────────────────────────────────────────
+M.launcher = {
+    apps = {
+        -- Ejemplos (descomenta los que quieras usar):
+        -- { name = "Safari",           icon = "🌐" },
+        -- { name = "Visual Studio Code", icon = "💻" },
+        -- { name = "Spotify",          icon = "🎵" },
+        -- { name = "Terminal",         icon = "⌨️"  },
+    },
 }
 
 -- ─────────────────────────────────────────────

@@ -2,6 +2,24 @@
 
 Registro de cambios del proyecto `dilware-tool-macSpaces`.
 
+## [2.1.0] - 2026-03-16
+
+### Agregado
+- `macspaces/clipboard.lua` — historial del portapapeles (hasta 20 entradas por defecto, configurable); soporta texto, imágenes y URLs; restaura al portapapeles con un clic para pegado manual
+- `macspaces/bluetooth.lua` — lista dispositivos Bluetooth conectados con nivel de batería via `ioreg`
+- `macspaces/network.lua` — información de red: tipo de conexión (WiFi/Ethernet), IP local, SSID, IP externa asíncrona via ip-api.com con país, región, ciudad, ISP y operador
+- `macspaces/vpn.lua` — detección de VPN activa (interfaces `utun*`/`ppp*`), IP del túnel e información geográfica via ip-api.com
+- `macspaces/presentation.lua` — modo presentación: activa No Molestar, oculta el Dock y limpia el escritorio; restaura el estado original al desactivar
+- `macspaces/launcher.lua` — lanzador rápido de apps configurable desde `config.lua` (vacío por defecto)
+- `config.lua`: nuevas secciones `clipboard`, `presentation` y `launcher`
+- `init.lua`: arranca `clipboard.start()`, `network.refresh()` y `vpn.refresh()` al iniciar
+- Indicador visual de VPN en el título del submenú (🔒 cuando está activa)
+- Acceso rápido a "Desactivar presentación" en la parte superior del menú cuando está activa
+
+### Cambiado
+- `menu.lua` integra los 6 nuevos submenús en orden lógico
+- Versión bumpeada a v2.1.0
+
 ## [2.0.0] - 2025-03-16
 
 ### Agregado

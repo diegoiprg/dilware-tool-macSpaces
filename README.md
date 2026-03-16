@@ -1,6 +1,6 @@
 # ⌘ macSpaces — Gestor de Espacios para macOS
 
-![Versión](https://img.shields.io/badge/versión-v2.0.0-6366f1?style=flat-square)
+![Versión](https://img.shields.io/badge/versión-v2.1.0-6366f1?style=flat-square)
 ![Licencia](https://img.shields.io/badge/licencia-GPLv3-a855f7?style=flat-square)
 ![Plataforma](https://img.shields.io/badge/plataforma-macOS-222?style=flat-square&logo=apple&logoColor=white)
 
@@ -25,6 +25,12 @@ Funciona desde la barra de menú de macOS, sin ventanas extra ni configuraciones
 - Usar Pomodoro con ciclos configurables y No Molestar automático
 - Activar recordatorios de descanso activo con intervalo configurable
 - Ver el estado de batería en la barra de menú (solo en MacBook)
+- Historial del portapapeles con hasta 20 entradas (texto, imágenes, URLs) y restauración con un clic
+- Ver dispositivos Bluetooth conectados con su nivel de batería
+- Información de red: tipo de conexión, IP local, IP externa, país, ISP y operador
+- Detección de VPN activa con información del túnel y geolocalización de la IP
+- Modo presentación: activa No Molestar, oculta el Dock y limpia el escritorio con un clic
+- Lanzador rápido de apps configurable desde `config.lua`
 - Personalizar todo editando un solo archivo: `macspaces/config.lua`
 
 ## Perfiles incluidos
