@@ -11,6 +11,9 @@ local utils = require("macspaces.utils")
 -- ─────────────────────────────────────────────
 
 -- Devuelve tabla con las interfaces VPN activas y sus IPs
+-- Excluye interfaces utun del sistema (iCloud, Handoff, AirDrop) que usan
+-- IPs de link-local (169.254.x.x) o rangos reservados de Apple (100.64.x.x).
+-- Solo considera VPN real si la IP es de rango privado estándar o pública.
 local function detect_vpn_interfaces()
     local vpn_ifaces = {}
     local ifaces = hs.network.interfaces()
@@ -23,7 +26,21 @@ local function detect_vpn_interfaces()
             if details and details["IPv4"] then
                 local addrs = details["IPv4"]["Addresses"]
                 local ip = (addrs and #addrs > 0) and addrs[1] or nil
-                table.insert(vpn_ifaces, { interface = iface, ip = ip })
+
+                -- Filtrar IPs del sistema: link-local (169.254.x.x) y
+                -- CGNAT de Apple/iCloud (100.64.x.x - 100.127.x.x)
+                local is_system = false
+                if ip then
+                    if ip:match("^169%.254%.") then is_system = true end
+                    local a, b = ip:match("^(%d+)%.(%d+)%.")
+                    if a == "100" and tonumber(b) >= 64 and tonumber(b) <= 127 then
+                        is_system = true
+                    end
+                end
+
+                if not is_system then
+                    table.insert(vpn_ifaces, { interface = iface, ip = ip })
+                end
             end
         end
     end

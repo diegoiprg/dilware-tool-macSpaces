@@ -15,12 +15,6 @@ local function has_focus_api()
     return hs.focus ~= nil and hs.focus.setFocusModeEnabled ~= nil
 end
 
--- Fallback: activa/desactiva DND via atajo de teclado del sistema (macOS 12+)
--- El atajo ⌥⌘F activa/desactiva Focus en macOS Monterey y posteriores
-local function toggle_via_shortcut()
-    hs.eventtap.keyStroke({ "alt", "cmd" }, "f", 0)
-end
-
 -- ─────────────────────────────────────────────
 -- API pública
 -- ─────────────────────────────────────────────

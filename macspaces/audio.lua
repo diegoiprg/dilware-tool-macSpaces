@@ -41,7 +41,7 @@ function M.build_submenu()
     local current = M.current_output()
 
     if #devices == 0 then
-        return {{ title = "Sin dispositivos de audio", disabled = true }}
+        return {{ title = "Sin dispositivos de audio", fn = function() end }}
     end
 
     local items = {}

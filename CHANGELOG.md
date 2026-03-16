@@ -2,6 +2,20 @@
 
 Registro de cambios del proyecto `dilware-tool-macSpaces`.
 
+## [2.1.3] - 2026-03-16
+
+### Corregido
+- `network.lua`: archivo truncado reconstruido — funciones `M.refresh()`, `M.local_info()`, `M.remote_info()` y `fetch_remote_info()` restauradas; el submenú Red ya no crashea al abrirse
+- `dnd.lua`: eliminada función `toggle_via_shortcut()` definida pero nunca usada (código muerto)
+- `clipboard.lua`: reemplazado `hs.image.imageFromName()` con emojis (no funciona en Hammerspoon) por texto con ícono en el campo `text` del chooser; elimina crash potencial al buscar en el historial
+- `browsers.lua`: ítem fallback "Sin navegadores detectados" cambiado de `disabled = true` a `fn = function() end` para mantener legibilidad
+- `audio.lua`: ítem fallback "Sin dispositivos de audio" cambiado de `disabled = true` a `fn = function() end`
+- `launcher.lua`: ítems de estado vacío ("Sin apps configuradas", "Edita launcher.apps…") cambiados de `disabled = true` a `fn = function() end`
+- `vpn.lua`: filtrado de interfaces `utun*` del sistema (iCloud Private Relay, Handoff, AirDrop) que generaban falsos positivos de VPN; se excluyen IPs link-local (`169.254.x.x`) y rango CGNAT de Apple (`100.64–127.x.x`)
+
+### Cambiado
+- Versión bumpeada a v2.1.3
+
 ## [2.1.2] - 2026-03-16
 
 ### Corregido

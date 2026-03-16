@@ -29,13 +29,13 @@ function M.build_submenu()
 
     if #apps == 0 then
         table.insert(items, {
-            title    = "Sin apps configuradas",
-            disabled = true,
+            title = "Sin apps configuradas",
+            fn    = function() end,
         })
         table.insert(items, { title = "-" })
         table.insert(items, {
-            title    = "Edita launcher.apps en config.lua",
-            disabled = true,
+            title = "Edita launcher.apps en config.lua",
+            fn    = function() end,
         })
         return items
     end

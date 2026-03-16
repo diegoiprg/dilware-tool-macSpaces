@@ -156,11 +156,10 @@ function M.build_submenu(on_update)
                 -- Mostrar resultados en un chooser (selector visual)
                 local choices = {}
                 for i, entry in ipairs(results) do
-                    local icon_map = { text = "📝", image = "🖼", url = "🔗", other = "📋" }
+                    local icon_map = { text = "📝", image = "🖼️", url = "🔗", other = "📋" }
                     table.insert(choices, {
-                        text    = entry.label,
+                        text    = (icon_map[entry.type] or "📋") .. "  " .. entry.label,
                         subText = os.date("%H:%M", entry.timestamp) .. "  ·  " .. (entry.type or ""),
-                        image   = hs.image.imageFromName(icon_map[entry.type] or "📋"),
                         _entry  = entry,
                         _index  = i,
                     })
