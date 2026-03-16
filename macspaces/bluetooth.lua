@@ -11,49 +11,65 @@ local utils = require("macspaces.utils")
 -- ─────────────────────────────────────────────
 
 local function parse_ioreg()
+    -- Consulta 1: dispositivos con BatteryPercent (Apple, AirPods, algunos BT)
+    -- Consulta 2: dispositivos con BatteryLevel (Logitech y otros terceros via BT)
+    -- Consulta 3: todos los dispositivos BT conectados (para capturar los sin batería)
     local output = hs.execute(
-        "ioreg -r -k BatteryPercent -l 2>/dev/null | " ..
-        "grep -E '\"(Product|BatteryPercent|DeviceAddress)\"'"
+        "ioreg -r -k BatteryPercent -l 2>/dev/null | grep -E '\"(Product|BatteryPercent|BatteryLevel|DeviceAddress)\"'; " ..
+        "ioreg -r -k BatteryLevel -l 2>/dev/null | grep -E '\"(Product|BatteryPercent|BatteryLevel|DeviceAddress)\"'; " ..
+        "ioreg -r -k DeviceAddress -l 2>/dev/null | grep -E '\"(Product|BatteryPercent|BatteryLevel|DeviceAddress)\"'"
     )
 
     local devices = {}
     local current = {}
 
     for line in output:gmatch("[^\n]+") do
-        -- Extraer clave y valor de líneas tipo: "Product" = "AirPods Pro"
+        -- Valor string: "Product" = "MX Master 3"
         local key, val = line:match('"(%w+)"%s*=%s*"([^"]*)"')
         if not key then
-            -- Intentar con valor numérico: "BatteryPercent" = 85
+            -- Valor numérico: "BatteryPercent" = 85
             key, val = line:match('"(%w+)"%s*=%s*(%d+)')
         end
 
         if key and val then
             if key == "Product" then
-                -- Guardar dispositivo anterior si existe
                 if current.name then
                     table.insert(devices, current)
                 end
                 current = { name = val }
             elseif key == "BatteryPercent" then
                 current.battery = tonumber(val)
+            elseif key == "BatteryLevel" then
+                -- Solo usar BatteryLevel si no hay BatteryPercent ya
+                if not current.battery then
+                    current.battery = tonumber(val)
+                end
             elseif key == "DeviceAddress" then
                 current.address = val
             end
         end
     end
 
-    -- Guardar el último dispositivo
     if current.name then
         table.insert(devices, current)
     end
 
-    -- Eliminar duplicados por nombre
+    -- Eliminar duplicados por nombre (priorizar el que tenga batería)
     local seen = {}
     local unique = {}
     for _, dev in ipairs(devices) do
         if not seen[dev.name] then
             seen[dev.name] = true
             table.insert(unique, dev)
+        elseif dev.battery and not seen[dev.name .. "_bat"] then
+            -- Actualizar batería si el duplicado la tiene y el original no
+            for _, u in ipairs(unique) do
+                if u.name == dev.name and not u.battery then
+                    u.battery = dev.battery
+                    break
+                end
+            end
+            seen[dev.name .. "_bat"] = true
         end
     end
 
@@ -81,15 +97,15 @@ end
 -- Ícono según tipo de dispositivo (heurística por nombre)
 local function device_icon(name)
     local lower = name:lower()
-    if lower:match("airpod") or lower:match("headphone") or lower:match("auricular") then
+    if lower:match("airpod") or lower:match("headphone") or lower:match("auricular") or lower:match("buds") then
         return "🎧"
-    elseif lower:match("mouse") or lower:match("magic mouse") then
+    elseif lower:match("mouse") or lower:match("mx master") or lower:match("mx anywhere") or lower:match("lift") then
         return "🖱"
-    elseif lower:match("keyboard") or lower:match("teclado") then
+    elseif lower:match("keyboard") or lower:match("teclado") or lower:match("keys") then
         return "⌨️"
     elseif lower:match("trackpad") then
         return "⬜"
-    elseif lower:match("speaker") or lower:match("altavoz") then
+    elseif lower:match("speaker") or lower:match("altavoz") or lower:match("soundlink") then
         return "🔊"
     end
     return "📱"
