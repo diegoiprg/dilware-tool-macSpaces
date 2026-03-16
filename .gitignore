@@ -2,23 +2,25 @@
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Icones de Finder
 Icon?
 ._*
 
-# Archivos de Hammerspoon
-.hammerspoon/debug.log
-
-# Logs del sistema
+# Hammerspoon
+debug.log
 *.log
-*.swp
 
-# VSCode
+# Editores
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Archivos temporales
+# Temporales
 *.tmp
 *.bak
 *.old
 *.orig
+
+# Kiro
+.kiro/
