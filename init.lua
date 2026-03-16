@@ -3,11 +3,10 @@
 -- https://github.com/diegoiprg/dilware-tool-macSpaces
 
 -- ─────────────────────────────────────────────
--- Punto de entrada de macSpaces v2.2.0
+-- Punto de entrada de macSpaces v2.2.1
 -- Carga módulos y arranca el sistema.
 -- ─────────────────────────────────────────────
 
--- Agregar la carpeta macspaces/ al path de require de Lua
 local hs_dir = os.getenv("HOME") .. "/.hammerspoon"
 package.path = hs_dir .. "/?.lua;" ..
                hs_dir .. "/?/init.lua;" ..
@@ -21,19 +20,19 @@ local network   = require("macspaces.network")
 local vpn       = require("macspaces.vpn")
 local menu      = require("macspaces.menu")
 
--- Limpiar log e iniciar
 utils.clear_log()
 utils.log("[INFO] macSpaces v" .. cfg.VERSION .. " iniciado")
 
--- Iniciar watcher del portapapeles
-clipboard.start(function() menu.build() end)
+-- El portapapeles captura entradas en segundo plano (sin reconstruir el menú)
+clipboard.start()
 
--- Obtener información de red y VPN en segundo plano
-network.refresh(function() menu.build() end)
-vpn.refresh(function() menu.build() end)
+-- Red y VPN obtienen datos en segundo plano (sin reconstruir el menú)
+-- El menú se construye on-demand al abrirse, siempre con datos frescos
+network.refresh()
+vpn.refresh()
 
 -- Registrar hotkeys globales
 hotkeys.register(function() menu.build() end)
 
--- Construir menú inicial
-menu.build()
+-- Inicializar menú (setMenu con función on-demand)
+menu.init()

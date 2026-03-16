@@ -74,6 +74,7 @@ function M.start(on_change)
         if count ~= last_change then
             last_change = count
             capture_entry()
+            -- on_change es opcional; ya no se usa para reconstruir el menú
             if on_change then on_change() end
         end
     end)

@@ -2,6 +2,17 @@
 
 Registro de cambios del proyecto `dilware-tool-macSpaces`.
 
+## [2.2.1] - 2026-03-16
+
+### Corregido
+- `menu.lua`: menú ya no parpadea ni se cierra al abrirse desde Finder — reemplazado `setMenu(tabla)` por `setMenu(función)`; Hammerspoon construye el contenido on-demand solo cuando el usuario abre el menú, nunca mientras está visible
+- `init.lua`: eliminados callbacks de `menu.build()` en `clipboard.start()`, `network.refresh()` y `vpn.refresh()`; ya no son necesarios con el modelo on-demand
+- `pomodoro.lua`: eliminada llamada a `on_update()` cada segundo dentro del timer; eliminaba el menú si estaba abierto durante un ciclo Pomodoro activo
+
+### Cambiado
+- `menu.lua`: nueva función `M.init()` para registrar el menú on-demand; `M.build()` solo actualiza el ícono del título
+- Versión bumpeada a v2.2.1
+
 ## [2.2.0] - 2026-03-16
 
 ### Mejorado (UX/UI)

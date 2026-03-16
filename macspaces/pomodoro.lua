@@ -64,8 +64,6 @@ local function start_phase(phase)
     state.timer = hs.timer.doEvery(1, function()
         state.seconds_left = state.seconds_left - 1
 
-        if state.on_update then state.on_update() end
-
         if state.seconds_left <= 0 then
             stop_timer()
 

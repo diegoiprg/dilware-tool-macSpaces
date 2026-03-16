@@ -1,5 +1,7 @@
 -- macspaces/menu.lua
 -- Construcción y gestión del menú de la barra de estado.
+-- Usa setMenu(fn) para construir el menú on-demand al abrirse,
+-- evitando parpadeos por reconstrucciones mientras está visible.
 
 local M = {}
 
@@ -20,11 +22,14 @@ local launcher     = require("macspaces.launcher")
 
 local menubar = hs.menubar.new()
 
-local function refresh()
-    M.build()
-end
+-- ─────────────────────────────────────────────
+-- Construcción del menú (llamada on-demand por Hammerspoon)
+-- ─────────────────────────────────────────────
 
-function M.build()
+local function build_items()
+    -- refresh se usa como callback tras acciones que cambian estado
+    local function refresh() M.build() end
+
     local items = {}
 
     -- ══ Perfiles ══════════════════════════════
@@ -74,13 +79,11 @@ function M.build()
     -- ══ Dispositivos ══════════════════════════
     table.insert(items, { title = "-" })
 
-    -- Batería inline (solo MacBook)
     local bat = battery.status_label()
     if bat then
         table.insert(items, { title = bat, fn = function() end })
     end
 
-    -- Bluetooth con conteo inline
     local bt_devices = bluetooth.devices()
     local bt_title   = #bt_devices > 0
         and ("Bluetooth  (" .. #bt_devices .. ")")
@@ -93,7 +96,6 @@ function M.build()
     -- ══ Red ═══════════════════════════════════
     table.insert(items, { title = "-" })
 
-    -- Red con IP local inline
     local local_i   = network.local_info()
     local net_title = "Red"
     if local_i and local_i.local_ip then
@@ -104,7 +106,6 @@ function M.build()
         title = net_title,
         menu  = network.build_submenu(refresh),
     })
-
     table.insert(items, {
         title = vpn.is_active() and "VPN  🔒" or "VPN",
         menu  = vpn.build_submenu(refresh),
@@ -121,7 +122,6 @@ function M.build()
         menu  = launcher.build_submenu(),
     })
 
-    -- Pomodoro: tiempo restante en el título del ítem padre
     local pom_title = pomodoro.is_active()
         and ("Pomodoro  " .. (pomodoro.time_label() or ""))
         or  "Pomodoro"
@@ -135,7 +135,6 @@ function M.build()
         menu  = breaks.build_submenu(refresh),
     })
 
-    -- Modo presentación: acceso rápido si está activo
     local pres_title = presentation.is_active()
         and "🎬  Presentación  —  Desactivar"
         or  "Modo presentación"
@@ -165,8 +164,23 @@ function M.build()
         fn    = hs.reload,
     })
 
+    return items
+end
+
+-- ─────────────────────────────────────────────
+-- API pública
+-- ─────────────────────────────────────────────
+
+-- M.build() solo actualiza el ícono del título.
+-- El contenido del menú se construye on-demand via setMenu(fn).
+function M.build()
     menubar:setTitle(cfg.menu_icon)
-    menubar:setMenu(items)
+end
+
+function M.init()
+    menubar:setTitle(cfg.menu_icon)
+    -- Pasar función: Hammerspoon la llama solo cuando el usuario abre el menú
+    menubar:setMenu(build_items)
 end
 
 function M.destroy()
