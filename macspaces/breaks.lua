@@ -92,7 +92,7 @@ function M.build_submenu(on_update)
         and ("◉  Activo — cada " .. cfg.breaks.interval_minutes .. " min")
         or  "○  Inactivo"
 
-    table.insert(items, { title = status, disabled = true })
+    table.insert(items, { title = status, fn = function() end })
     table.insert(items, { title = "-" })
 
     if state.enabled then
@@ -109,7 +109,7 @@ function M.build_submenu(on_update)
 
     -- Opciones de intervalo
     table.insert(items, { title = "-" })
-    table.insert(items, { title = "Intervalo:", disabled = true })
+    table.insert(items, { title = "Intervalo:", fn = function() end })
 
     for _, mins in ipairs({ 30, 45, 50, 60, 90 }) do
         local current = (cfg.breaks.interval_minutes == mins)

@@ -103,54 +103,52 @@ function M.refresh(on_done)
     end
 end
 
+-- Helper: ítem informativo legible (copia valor al portapapeles al hacer clic)
+local function info_item(label, value)
+    return {
+        title = label .. value,
+        fn    = function() hs.pasteboard.setContents(value) end,
+    }
+end
+
 -- Construye el submenú de VPN
 function M.build_submenu(on_update)
     local ifaces = detect_vpn_interfaces()
     local items  = {}
 
     if #ifaces == 0 then
-        table.insert(items, { title = "🔓  Sin VPN activa", disabled = true })
+        table.insert(items, { title = "🔓  Sin VPN activa", fn = function() end })
         return items
     end
 
-    -- Estado general
     table.insert(items, {
-        title    = "🔒  VPN activa (" .. #ifaces .. " interfaz" .. (#ifaces > 1 and "es" or "") .. ")",
-        disabled = true,
+        title = "🔒  VPN activa (" .. #ifaces .. " interfaz" .. (#ifaces > 1 and "es" or "") .. ")",
+        fn    = function() end,
     })
     table.insert(items, { title = "-" })
 
-    -- Detalle por interfaz
     for _, iface in ipairs(ifaces) do
-        table.insert(items, {
-            title    = "    Interfaz: " .. iface.interface,
-            disabled = true,
-        })
+        table.insert(items, info_item("Interfaz: ", iface.interface))
         if iface.ip then
-            table.insert(items, {
-                title    = "    IP del túnel: " .. iface.ip,
-                disabled = true,
-            })
+            table.insert(items, info_item("IP del túnel: ", iface.ip))
         end
     end
 
-    -- Información geográfica del túnel (si disponible)
     local info = cache.data
     if info then
         table.insert(items, { title = "-" })
-        table.insert(items, { title = "🌍  IP pública via VPN", disabled = true })
-        table.insert(items, { title = "    IP: "       .. (info.query      or "?"), disabled = true })
-        table.insert(items, { title = "    País: "     .. (info.country    or "?"), disabled = true })
-        table.insert(items, { title = "    Región: "   .. (info.regionName or "?"), disabled = true })
-        table.insert(items, { title = "    Ciudad: "   .. (info.city       or "?"), disabled = true })
-        table.insert(items, { title = "    ISP: "      .. (info.isp        or "?"), disabled = true })
-        table.insert(items, { title = "    Operador: " .. (info.org        or "?"), disabled = true })
+        table.insert(items, { title = "🌍  IP pública via VPN", fn = function() end })
+        table.insert(items, info_item("IP: ",       info.query      or "?"))
+        table.insert(items, info_item("País: ",     info.country    or "?"))
+        table.insert(items, info_item("Región: ",   info.regionName or "?"))
+        table.insert(items, info_item("Ciudad: ",   info.city       or "?"))
+        table.insert(items, info_item("ISP: ",      info.isp        or "?"))
+        table.insert(items, info_item("Operador: ", info.org        or "?"))
     else
         table.insert(items, { title = "-" })
-        table.insert(items, { title = "    Obteniendo información…", disabled = true })
+        table.insert(items, { title = "Obteniendo información…", fn = function() end })
     end
 
-    -- Refrescar
     table.insert(items, { title = "-" })
     table.insert(items, {
         title = "Actualizar",

@@ -135,14 +135,14 @@ function M.build_submenu(on_update)
 
     table.insert(items, { title = "-" })
 
-    -- Indicadores de estado
-    local dnd_label  = (pcfg.enable_dnd  ~= false) and "✓  No Molestar" or "✗  No Molestar"
-    local dock_label = (pcfg.hide_dock   ~= false) and "✓  Ocultar Dock" or "✗  Ocultar Dock"
+    -- Indicadores de estado (legibles, no disabled)
+    local dnd_label  = (pcfg.enable_dnd   ~= false) and "✓  No Molestar"        or "✗  No Molestar"
+    local dock_label = (pcfg.hide_dock    ~= false) and "✓  Ocultar Dock"       or "✗  Ocultar Dock"
     local desk_label = (pcfg.hide_desktop ~= false) and "✓  Limpiar escritorio" or "✗  Limpiar escritorio"
 
-    table.insert(items, { title = "    " .. dnd_label,  disabled = true })
-    table.insert(items, { title = "    " .. dock_label, disabled = true })
-    table.insert(items, { title = "    " .. desk_label, disabled = true })
+    table.insert(items, { title = dnd_label,  fn = function() end })
+    table.insert(items, { title = dock_label, fn = function() end })
+    table.insert(items, { title = desk_label, fn = function() end })
 
     return items
 end

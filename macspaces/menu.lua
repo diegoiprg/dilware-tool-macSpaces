@@ -70,8 +70,8 @@ function M.build()
         if label then
             table.insert(items, { title = "-" })
             table.insert(items, {
-                title    = label .. "  —  Ciclo " .. pomodoro.cycles_completed(),
-                disabled = true,
+                title = label .. "  —  Ciclo " .. pomodoro.cycles_completed(),
+                fn    = function() end,
             })
         end
     end
@@ -101,10 +101,7 @@ function M.build()
     -- ── Batería (solo si aplica) ───────────────
     local bat = battery.status_label()
     if bat then
-        table.insert(items, {
-            title    = bat,
-            disabled = true,
-        })
+        table.insert(items, { title = bat, fn = function() end })
     end
 
     -- ── Bluetooth ─────────────────────────────

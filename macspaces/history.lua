@@ -70,27 +70,25 @@ function M.build_submenu()
     local data  = load_data()
     local items = {}
 
-    table.insert(items, {
-        title    = "Hoy — " .. os.date("%d/%m/%Y"),
-        disabled = true,
-    })
+    table.insert(items, { title = "Hoy — " .. os.date("%d/%m/%Y"), fn = function() end })
     table.insert(items, { title = "-" })
 
     local has_data = false
     for _, key in ipairs(cfg.profile_order) do
-        local profile  = cfg.profiles[key]
-        local seconds  = (data[today] and data[today][key]) or 0
+        local profile = cfg.profiles[key]
+        local seconds = (data[today] and data[today][key]) or 0
         if seconds > 0 then
             has_data = true
+            local label = utils.format_time(seconds)
             table.insert(items, {
-                title    = profile.name .. ":  " .. utils.format_time(seconds),
-                disabled = true,
+                title = profile.name .. ":  " .. label,
+                fn    = function() hs.pasteboard.setContents(label) end,
             })
         end
     end
 
     if not has_data then
-        table.insert(items, { title = "Sin sesiones registradas hoy", disabled = true })
+        table.insert(items, { title = "Sin sesiones registradas hoy", fn = function() end })
     end
 
     return items

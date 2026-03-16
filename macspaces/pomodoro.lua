@@ -160,19 +160,18 @@ function M.build_submenu(on_update)
     local items = {}
 
     if state.active then
-        -- Estado actual
         local phase_names = {
             work        = "Trabajando",
             short_break = "Pausa corta",
             long_break  = "Pausa larga",
         }
         table.insert(items, {
-            title    = (phase_names[state.phase] or "Activo") .. " — " .. utils.format_time(state.seconds_left),
-            disabled = true,
+            title = (phase_names[state.phase] or "Activo") .. " — " .. utils.format_time(state.seconds_left),
+            fn    = function() end,
         })
         table.insert(items, {
-            title    = "Ciclos completados: " .. state.cycle,
-            disabled = true,
+            title = "Ciclos completados: " .. state.cycle,
+            fn    = function() end,
         })
         table.insert(items, { title = "-" })
         table.insert(items, {
@@ -185,9 +184,9 @@ function M.build_submenu(on_update)
         })
     else
         table.insert(items, {
-            title    = string.format("Ciclo: %d min trabajo / %d min pausa",
+            title = string.format("Ciclo: %d min trabajo / %d min pausa",
                 cfg.pomodoro.work_minutes, cfg.pomodoro.short_break),
-            disabled = true,
+            fn    = function() end,
         })
         table.insert(items, { title = "-" })
         table.insert(items, {

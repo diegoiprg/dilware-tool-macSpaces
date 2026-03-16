@@ -123,37 +123,91 @@ function M.build_submenu(on_update)
     local items = {}
     local max   = cfg.clipboard and cfg.clipboard.max_entries or 20
 
+    -- Encabezado con contador
     table.insert(items, {
-        title    = string.format("Historial (%d/%d)", #history, max),
-        disabled = true,
+        title = string.format("Historial  %d/%d", #history, max),
+        fn    = function() end,
     })
     table.insert(items, { title = "-" })
 
     if #history == 0 then
-        table.insert(items, { title = "Sin entradas aún", disabled = true })
-    else
-        for i, entry in ipairs(history) do
-            local time_label = os.date("%H:%M", entry.timestamp)
-            local icon = ({ text = "📝", image = "🖼", url = "🔗", other = "📋" })[entry.type] or "📋"
+        table.insert(items, { title = "Sin entradas aún", fn = function() end })
+        return items
+    end
 
-            table.insert(items, {
-                title = string.format("%s  %s  [%s]", icon, entry.label, time_label),
-                fn    = function()
-                    M.restore(i)
-                    utils.notify("macSpaces", "Portapapeles restaurado")
-                end,
-            })
-        end
+    -- Búsqueda: abre un diálogo de texto y filtra el historial
+    table.insert(items, {
+        title = "🔍  Buscar…",
+        fn    = function()
+            local ok, query = hs.dialog.textPrompt("Buscar en portapapeles", "Escribe para filtrar:", "", "Buscar", "Cancelar")
+            if not ok or query == "" then return end
 
-        table.insert(items, { title = "-" })
+            local q = query:lower()
+            local results = {}
+            for _, entry in ipairs(history) do
+                if entry.label:lower():find(q, 1, true) then
+                    table.insert(results, entry)
+                end
+            end
+
+            if #results == 0 then
+                hs.dialog.blockAlert("Sin resultados", "No se encontraron entradas para: " .. query, "OK")
+            else
+                -- Mostrar resultados en un chooser (selector visual)
+                local choices = {}
+                for i, entry in ipairs(results) do
+                    local icon_map = { text = "📝", image = "🖼", url = "🔗", other = "📋" }
+                    table.insert(choices, {
+                        text    = entry.label,
+                        subText = os.date("%H:%M", entry.timestamp) .. "  ·  " .. (entry.type or ""),
+                        image   = hs.image.imageFromName(icon_map[entry.type] or "📋"),
+                        _entry  = entry,
+                        _index  = i,
+                    })
+                end
+
+                local chooser = hs.chooser.new(function(choice)
+                    if not choice then return end
+                    -- Encontrar índice real en history
+                    for idx, e in ipairs(history) do
+                        if e == choice._entry then
+                            M.restore(idx)
+                            utils.notify("macSpaces", "Portapapeles restaurado")
+                            break
+                        end
+                    end
+                end)
+                chooser:choices(choices)
+                chooser:placeholderText("Resultados para: " .. query)
+                chooser:show()
+            end
+        end,
+    })
+
+    table.insert(items, { title = "-" })
+
+    -- Entradas del historial
+    for i, entry in ipairs(history) do
+        local time_label = os.date("%H:%M", entry.timestamp)
+        local icon = ({ text = "📝", image = "🖼", url = "🔗", other = "📋" })[entry.type] or "📋"
+
         table.insert(items, {
-            title = "Limpiar historial",
+            title = string.format("%s  %s  [%s]", icon, entry.label, time_label),
             fn    = function()
-                M.clear()
-                if on_update then on_update() end
+                M.restore(i)
+                utils.notify("macSpaces", "Portapapeles restaurado")
             end,
         })
     end
+
+    table.insert(items, { title = "-" })
+    table.insert(items, {
+        title = "Limpiar historial",
+        fn    = function()
+            M.clear()
+            if on_update then on_update() end
+        end,
+    })
 
     return items
 end

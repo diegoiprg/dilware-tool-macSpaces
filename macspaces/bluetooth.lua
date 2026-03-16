@@ -113,24 +113,24 @@ function M.build_submenu()
     local items   = {}
 
     if #devices == 0 then
-        table.insert(items, {
-            title    = "Sin dispositivos Bluetooth conectados",
-            disabled = true,
-        })
+        table.insert(items, { title = "Sin dispositivos Bluetooth conectados", fn = function() end })
         return items
     end
 
     for i, dev in ipairs(devices) do
         local icon = device_icon(dev.name)
+        -- Nombre del dispositivo (accionable, no disabled)
+        table.insert(items, { title = icon .. "  " .. dev.name, fn = function() end })
+        -- Batería: clic copia el porcentaje
+        local bat = battery_label(dev)
         table.insert(items, {
-            title    = icon .. "  " .. dev.name,
-            disabled = true,
+            title = "Batería: " .. bat,
+            fn    = function()
+                if dev.battery then
+                    hs.pasteboard.setContents(tostring(dev.battery) .. "%")
+                end
+            end,
         })
-        table.insert(items, {
-            title    = "    Batería: " .. battery_label(dev),
-            disabled = true,
-        })
-        -- Separador entre dispositivos (no al final)
         if i < #devices then
             table.insert(items, { title = "-" })
         end

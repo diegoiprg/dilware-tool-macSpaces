@@ -2,6 +2,17 @@
 
 Registro de cambios del proyecto `dilware-tool-macSpaces`.
 
+## [2.1.2] - 2026-03-16
+
+### Corregido
+- Todos los ítems informativos del menú cambiados de `disabled = true` (gris ilegible) a `fn = function() end` (color normal); los que muestran valores copiables (IPs, batería, tiempos) copian el valor al portapapeles al hacer clic
+- `clipboard.lua`: agregada búsqueda via `hs.dialog.textPrompt` + `hs.chooser` para filtrar entre las entradas del historial
+- `presentation.lua`: indicadores de estado del modo presentación ahora legibles
+- `menu.lua`: ítem de batería y tiempo Pomodoro ahora legibles en el menú principal
+
+### Cambiado
+- Versión bumpeada a v2.1.2
+
 ## [2.1.1] - 2026-03-16
 
 ### Corregido
