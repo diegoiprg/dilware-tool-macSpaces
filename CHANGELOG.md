@@ -2,6 +2,23 @@
 
 Registro de cambios del proyecto `dilware-tool-macSpaces`.
 
+## [2.1.1] - 2026-03-16
+
+### Corregido
+- `pomodoro.lua`: bug donde `M.stop()` mostraba "0 ciclos" en la notificación por leer `state.cycle` después de resetearlo
+- `dnd.lua`: reescrito para usar `hs.focus` (API nativa de Hammerspoon) con fallback limpio a `defaults -currentHost`; eliminado bloque AppleScript vacío que generaba errores silenciosos
+- `battery.lua`: detección de batería mejorada usando `hs.battery.cycles()` como indicador primario; evita falsos positivos en Mac mini con batería al 0%
+- `bluetooth.lua`: parser de `ioreg` reescrito con regex correcta para valores string y numéricos; eliminados duplicados por nombre; íconos dinámicos según tipo de dispositivo
+- `network.lua`: `hs.network.primaryInterfaces` ahora se verifica antes de llamar (no existe en todas las versiones de Hammerspoon)
+- `breaks.lua`: al cambiar el intervalo notifica al usuario que el nuevo valor aplica desde ahora
+- `audio.lua`: eliminada notificación ruidosa al cambiar audio (solo se notifica en caso de error, siguiendo HIG de Apple)
+
+### Cambiado
+- `README.md`: reescrito en estilo funcional/negocio Dilware, sin capturas de pantalla
+- `.gitignore`: actualizado para excluir `macspaces_history.json` y archivos macOS adicionales
+- `pomodoro.lua`: ícono de pausa larga cambiado de 🛋 a 🌿 (más reconocible, alineado con HIG)
+- Versión bumpeada a v2.1.1
+
 ## [2.1.0] - 2026-03-16
 
 ### Agregado

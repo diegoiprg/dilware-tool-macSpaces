@@ -1,36 +1,36 @@
 # ⌘ macSpaces — Gestor de Espacios para macOS
 
-![Versión](https://img.shields.io/badge/versión-v2.1.0-6366f1?style=flat-square)
+![Versión](https://img.shields.io/badge/versión-v2.1.1-6366f1?style=flat-square)
 ![Licencia](https://img.shields.io/badge/licencia-GPLv3-a855f7?style=flat-square)
 ![Plataforma](https://img.shields.io/badge/plataforma-macOS-222?style=flat-square&logo=apple&logoColor=white)
 
-Organiza tu Mac con un clic. Crea espacios de trabajo con las apps que necesitas, cambia tu navegador y audio, y cuida tu productividad con Pomodoro y recordatorios de descanso.
+Tu entorno de trabajo, organizado con un clic.
 
 ---
 
 ## ¿Qué es?
 
-Una herramienta gratuita para macOS que gestiona espacios virtuales (Mission Control) con perfiles predefinidos, y centraliza en un solo ícono de barra de menú el control de tu entorno de trabajo.
+Una herramienta gratuita para macOS que centraliza en un solo ícono de barra de menú el control de tu entorno de trabajo: espacios virtuales, navegador, audio, red, portapapeles, productividad y más.
 
-Funciona desde la barra de menú de macOS, sin ventanas extra ni configuraciones complicadas.
+Funciona en segundo plano, sin ventanas extra ni configuraciones complicadas. Todo desde la barra de menú.
 
 ## ¿Qué puedo hacer?
 
-- Crear un espacio de trabajo con un clic y abrir automáticamente las apps del perfil
-- Cerrar un perfil y que se cierren sus apps y se elimine el espacio
-- Cambiar el navegador predeterminado del sistema desde el menú (solo muestra navegadores reales)
-- Cambiar el dispositivo de salida de audio sin abrir Preferencias del Sistema
+- Activar un perfil de trabajo con un clic y abrir automáticamente todas sus apps en un espacio dedicado
+- Cerrar el perfil y que se limpie todo: apps cerradas, espacio eliminado
+- Cambiar el navegador predeterminado del sistema sin abrir Preferencias del Sistema
+- Cambiar el dispositivo de salida de audio al instante
+- Ver el estado de batería directamente en el menú (solo en MacBook)
+- Consultar los dispositivos Bluetooth conectados con su nivel de batería
+- Ver información de tu red: tipo de conexión, IP local, IP externa, país e ISP
+- Detectar si estás conectado a una VPN con información del túnel y su geolocalización
+- Mantener un historial del portapapeles con hasta 20 entradas y restaurar cualquiera con un clic
+- Usar Pomodoro con ciclos configurables y No Molestar automático durante el trabajo
+- Activar recordatorios de descanso activo para cuidar tu postura y vista
+- Entrar en modo presentación: No Molestar, Dock oculto y escritorio limpio con un solo clic
+- Lanzar tus apps favoritas desde un acceso rápido configurable
+- Ver el tiempo acumulado por perfil durante el día
 - Activar perfiles con atajos de teclado (⌘⌥1 / ⌘⌥2)
-- Ver el tiempo acumulado por perfil en el día
-- Usar Pomodoro con ciclos configurables y No Molestar automático
-- Activar recordatorios de descanso activo con intervalo configurable
-- Ver el estado de batería en la barra de menú (solo en MacBook)
-- Historial del portapapeles con hasta 20 entradas (texto, imágenes, URLs) y restauración con un clic
-- Ver dispositivos Bluetooth conectados con su nivel de batería
-- Información de red: tipo de conexión, IP local, IP externa, país, ISP y operador
-- Detección de VPN activa con información del túnel y geolocalización de la IP
-- Modo presentación: activa No Molestar, oculta el Dock y limpia el escritorio con un clic
-- Lanzador rápido de apps configurable desde `config.lua`
 - Personalizar todo editando un solo archivo: `macspaces/config.lua`
 
 ## Perfiles incluidos
@@ -42,9 +42,9 @@ Funciona desde la barra de menú de macOS, sin ventanas extra ni configuraciones
 
 ## ¿Para quién es?
 
-- Personas que trabajan con múltiples contextos en su Mac (trabajo, personal, estudio)
-- Usuarios que quieren organizar sus espacios sin apps de pago
-- Cualquiera que busque automatizar su flujo de trabajo en macOS
+- Personas que trabajan con múltiples contextos en su Mac y quieren cambiar entre ellos sin fricción
+- Usuarios que buscan organizar su entorno sin apps de pago ni configuraciones complejas
+- Cualquiera que quiera tener su Mac bajo control desde un solo lugar
 
 ## Requisitos
 
@@ -52,13 +52,13 @@ Funciona desde la barra de menú de macOS, sin ventanas extra ni configuraciones
 - [Hammerspoon](https://www.hammerspoon.org) instalado
 - Permisos de Accesibilidad y Automatización para Hammerspoon
 
-## Instalación rápida
+## Instalación
 
 ```bash
 curl -sL https://raw.githubusercontent.com/diegoiprg/dilware-tool-macSpaces/main/install.sh | bash
 ```
 
-Después, abre Hammerspoon y presiona ⌘R para recargar.
+Después abre Hammerspoon y presiona ⌘R para recargar. El ícono ⌘ aparecerá en tu barra de menú.
 
 ---
 

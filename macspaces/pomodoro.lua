@@ -107,7 +107,7 @@ function M.time_label()
     local phase_labels = {
         work        = "🍅",
         short_break = "☕",
-        long_break  = "🛋",
+        long_break  = "🌿",
     }
     local icon = phase_labels[state.phase] or "⏱"
     return icon .. " " .. utils.format_time(state.seconds_left)
@@ -126,6 +126,7 @@ end
 -- Detiene el Pomodoro completamente
 function M.stop()
     if not state.active then return end
+    local completed = state.cycle  -- guardar antes de resetear
     stop_timer()
     state.active       = false
     state.phase        = nil
@@ -135,7 +136,7 @@ function M.stop()
 
     if cfg.pomodoro.enable_dnd then dnd.disable() end
     utils.log("[INFO] Pomodoro detenido")
-    utils.notify("Pomodoro", "Temporizador detenido. " .. state.cycle .. " ciclos completados.")
+    utils.notify("Pomodoro", "Temporizador detenido. " .. completed .. " ciclo" .. (completed == 1 and "" or "s") .. " completado" .. (completed == 1 and "" or "s") .. ".")
 end
 
 -- Salta a la siguiente fase manualmente

@@ -29,9 +29,9 @@ function M.set_output(device)
     local ok = device:setDefaultOutputDevice()
     if ok then
         utils.log("[OK] Audio: salida cambiada a " .. device:name())
-        utils.notify("macSpaces", "Audio: " .. device:name())
     else
         utils.log("[ERROR] Audio: no se pudo cambiar a " .. device:name())
+        utils.notify("macSpaces", "No se pudo cambiar el audio a " .. device:name())
     end
 end
 

@@ -24,17 +24,27 @@ local cache = {
 local function get_local_info()
     local info = {}
 
-    -- Interfaz activa y tipo (WiFi o Ethernet)
     local ifaces = hs.network.interfaces()
-    local primary = hs.network.primaryInterfaces and hs.network.primaryInterfaces()
 
-    -- Detectar interfaz primaria activa
+    -- Detectar interfaz primaria activa (con IPv4 asignada)
     local active_iface = nil
-    for _, iface in ipairs(ifaces or {}) do
-        local details = hs.network.interfaceDetails(iface)
-        if details and details["IPv4"] then
-            active_iface = iface
-            break
+
+    -- Intentar API nativa primero (Hammerspoon 0.9.90+)
+    if hs.network.primaryInterfaces then
+        local primary = hs.network.primaryInterfaces()
+        if primary and primary ~= "" then
+            active_iface = primary
+        end
+    end
+
+    -- Fallback: buscar la primera interfaz con IPv4
+    if not active_iface then
+        for _, iface in ipairs(ifaces or {}) do
+            local details = hs.network.interfaceDetails(iface)
+            if details and details["IPv4"] then
+                active_iface = iface
+                break
+            end
         end
     end
 

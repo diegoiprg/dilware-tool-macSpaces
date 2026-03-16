@@ -10,22 +10,26 @@ local utils = require("macspaces.utils")
 -- Lectura via ioreg
 -- ─────────────────────────────────────────────
 
--- Parsea la salida de ioreg y devuelve tabla de dispositivos
 local function parse_ioreg()
     local output = hs.execute(
         "ioreg -r -k BatteryPercent -l 2>/dev/null | " ..
-        "grep -E '\"(Product|BatteryPercent|DeviceAddress|BatteryStatus)\"'"
+        "grep -E '\"(Product|BatteryPercent|DeviceAddress)\"'"
     )
 
     local devices = {}
     local current = {}
 
     for line in output:gmatch("[^\n]+") do
-        local key, val = line:match('"(%w+)"%s*=%s*(.+)')
-        if key and val then
-            val = val:gsub('^"', ""):gsub('"$', ""):gsub("%s+$", "")
+        -- Extraer clave y valor de líneas tipo: "Product" = "AirPods Pro"
+        local key, val = line:match('"(%w+)"%s*=%s*"([^"]*)"')
+        if not key then
+            -- Intentar con valor numérico: "BatteryPercent" = 85
+            key, val = line:match('"(%w+)"%s*=%s*(%d+)')
+        end
 
+        if key and val then
             if key == "Product" then
+                -- Guardar dispositivo anterior si existe
                 if current.name then
                     table.insert(devices, current)
                 end
@@ -34,17 +38,26 @@ local function parse_ioreg()
                 current.battery = tonumber(val)
             elseif key == "DeviceAddress" then
                 current.address = val
-            elseif key == "BatteryStatus" then
-                current.status = val
             end
         end
     end
 
+    -- Guardar el último dispositivo
     if current.name then
         table.insert(devices, current)
     end
 
-    return devices
+    -- Eliminar duplicados por nombre
+    local seen = {}
+    local unique = {}
+    for _, dev in ipairs(devices) do
+        if not seen[dev.name] then
+            seen[dev.name] = true
+            table.insert(unique, dev)
+        end
+    end
+
+    return unique
 end
 
 -- ─────────────────────────────────────────────
@@ -52,18 +65,34 @@ end
 -- ─────────────────────────────────────────────
 
 local function battery_icon(pct)
-    if not pct then return "🔵" end
+    if not pct then return "○" end
     if pct >= 80 then return "🔋" end
-    if pct >= 40 then return "🔋" end
-    if pct >= 20 then return "🪫" end
+    if pct >= 20 then return "🔋" end
     return "🪫"
 end
 
 local function battery_label(device)
     if device.battery then
-        return string.format("%s %d%%", battery_icon(device.battery), device.battery)
+        return string.format("%s  %d%%", battery_icon(device.battery), device.battery)
     end
     return "Sin datos de batería"
+end
+
+-- Ícono según tipo de dispositivo (heurística por nombre)
+local function device_icon(name)
+    local lower = name:lower()
+    if lower:match("airpod") or lower:match("headphone") or lower:match("auricular") then
+        return "🎧"
+    elseif lower:match("mouse") or lower:match("magic mouse") then
+        return "🖱"
+    elseif lower:match("keyboard") or lower:match("teclado") then
+        return "⌨️"
+    elseif lower:match("trackpad") then
+        return "⬜"
+    elseif lower:match("speaker") or lower:match("altavoz") then
+        return "🔊"
+    end
+    return "📱"
 end
 
 -- ─────────────────────────────────────────────
@@ -79,7 +108,6 @@ function M.devices()
     return result
 end
 
--- Construye el submenú de Bluetooth
 function M.build_submenu()
     local devices = M.devices()
     local items   = {}
@@ -92,30 +120,20 @@ function M.build_submenu()
         return items
     end
 
-    for _, dev in ipairs(devices) do
-        -- Nombre del dispositivo
+    for i, dev in ipairs(devices) do
+        local icon = device_icon(dev.name)
         table.insert(items, {
-            title    = "🎧  " .. (dev.name or "Dispositivo desconocido"),
+            title    = icon .. "  " .. dev.name,
             disabled = true,
         })
-        -- Batería
         table.insert(items, {
-            title    = "    " .. battery_label(dev),
+            title    = "    Batería: " .. battery_label(dev),
             disabled = true,
         })
-        -- Dirección BT si está disponible
-        if dev.address then
-            table.insert(items, {
-                title    = "    " .. dev.address,
-                disabled = true,
-            })
+        -- Separador entre dispositivos (no al final)
+        if i < #devices then
+            table.insert(items, { title = "-" })
         end
-        table.insert(items, { title = "-" })
-    end
-
-    -- Quitar el último separador
-    if #items > 0 and items[#items].title == "-" then
-        table.remove(items)
     end
 
     return items

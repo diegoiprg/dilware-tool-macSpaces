@@ -119,7 +119,8 @@ function M.build_submenu(on_update)
             fn      = function()
                 cfg.breaks.interval_minutes = mins
                 if state.enabled then
-                    start_timer() -- reiniciar con nuevo intervalo
+                    start_timer()
+                    utils.notify("Descanso activo", "Intervalo actualizado a " .. mins .. " min")
                 end
                 if on_update then on_update() end
             end,

@@ -4,10 +4,13 @@
 .LSOverride
 Icon?
 ._*
+.Spotlight-V100
+.Trashes
 
-# Hammerspoon
+# Hammerspoon — archivos generados en runtime (no van al repo)
 debug.log
 *.log
+macspaces_history.json
 
 # Editores
 .vscode/
@@ -22,5 +25,5 @@ debug.log
 *.old
 *.orig
 
-# Kiro
+# Kiro (IDE local, no parte del proyecto)
 .kiro/

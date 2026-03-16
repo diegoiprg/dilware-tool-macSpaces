@@ -4,11 +4,15 @@
 local M = {}
 
 -- Devuelve true si el dispositivo tiene batería (MacBook, no Mac mini/iMac)
+-- Usa hs.battery.cycles() como indicador más confiable que el porcentaje
 function M.has_battery()
-    local battery = hs.battery
-    if not battery then return false end
-    local pct = battery.percentage()
-    return pct ~= nil and pct > 0
+    if not hs.battery then return false end
+    -- cycles() devuelve nil en dispositivos sin batería (Mac mini, iMac, Mac Pro)
+    local cycles = hs.battery.cycles()
+    if cycles ~= nil and cycles > 0 then return true end
+    -- Fallback: powerSource devuelve "Battery Power" solo si hay batería en uso
+    local source = hs.battery.powerSource()
+    return source == "Battery Power"
 end
 
 -- Devuelve el porcentaje actual de batería
