@@ -7,8 +7,9 @@ local cfg   = require("macspaces.config")
 local utils = require("macspaces.utils")
 
 -- Estado en tiempo de ejecución (space_id por perfil)
+-- Inicializado con profile_order para garantizar orden determinístico
 local state = {}
-for key, _ in pairs(cfg.profiles) do
+for _, key in ipairs(cfg.profile_order) do
     state[key] = { space_id = nil, started_at = nil }
 end
 

@@ -170,7 +170,8 @@ local function build_items()
     table.insert(items, {
         title = "Ver registro",
         fn    = function()
-            local log_path = os.getenv("HOME") .. "/.hammerspoon/debug.log"
+            local home     = os.getenv("HOME") or "/tmp"
+            local log_path = home .. "/.hammerspoon/debug.log"
             hs.execute("open -a Console " .. log_path)
         end,
     })

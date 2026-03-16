@@ -2,6 +2,16 @@
 
 Registro de cambios del proyecto `dilware-tool-macSpaces`.
 
+## [2.3.1] - 2026-03-16
+
+### Corregido
+- `hotkeys.lua`: línea rota en el bucle `for key, binding in pairs(cfg.hotkeys)` — artefacto de edición anterior que pegaba dos sentencias en una sola línea, causando error de sintaxis Lua
+- `menu.lua`: guard para `HOME` nil en la función "Ver registro" — inconsistente con el fix aplicado en `utils.lua` en v2.3.0
+- `profiles.lua`: inicialización del estado con `ipairs(cfg.profile_order)` en lugar de `pairs(cfg.profiles)` — garantiza orden determinístico y consistencia con el array de orden definido en config
+
+### Cambiado
+- Versión bumpeada a v2.3.1
+
 ## [2.3.0] - 2026-03-16
 
 ### Corregido
