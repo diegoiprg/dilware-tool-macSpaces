@@ -127,10 +127,7 @@ function M.refresh(on_done)
     end
 end
 
--- Helper: ítem informativo legible (usa utils.info_item compartido)
-local function info_item(label, value)
-    return utils.info_item(label, value)
-end
+-- Helper: ítem informativo legible — usa utils.info_item directamente (sin wrapper)
 
 -- Construye el submenú de VPN
 function M.build_submenu(on_update)
@@ -149,9 +146,9 @@ function M.build_submenu(on_update)
     table.insert(items, { title = "-" })
 
     for _, iface in ipairs(ifaces) do
-        table.insert(items, info_item("Interfaz: ", iface.interface))
+        table.insert(items, utils.info_item("Interfaz: ", iface.interface))
         if iface.ip then
-            table.insert(items, info_item("IP del túnel: ", iface.ip))
+            table.insert(items, utils.info_item("IP del túnel: ", iface.ip))
         end
     end
 
@@ -159,12 +156,12 @@ function M.build_submenu(on_update)
     if info then
         table.insert(items, { title = "-" })
         table.insert(items, { title = "🌍  IP pública via VPN", fn = function() end })
-        table.insert(items, info_item("IP: ",       info.query      or "?"))
-        table.insert(items, info_item("País: ",     info.country    or "?"))
-        table.insert(items, info_item("Región: ",   info.regionName or "?"))
-        table.insert(items, info_item("Ciudad: ",   info.city       or "?"))
-        table.insert(items, info_item("ISP: ",      info.isp        or "?"))
-        table.insert(items, info_item("Operador: ", info.org        or "?"))
+        table.insert(items, utils.info_item("IP: ",       info.query      or "?"))
+        table.insert(items, utils.info_item("País: ",     info.country    or "?"))
+        table.insert(items, utils.info_item("Región: ",   info.regionName or "?"))
+        table.insert(items, utils.info_item("Ciudad: ",   info.city       or "?"))
+        table.insert(items, utils.info_item("ISP: ",      info.isp        or "?"))
+        table.insert(items, utils.info_item("Operador: ", info.org        or "?"))
     else
         table.insert(items, { title = "-" })
         table.insert(items, { title = "Obteniendo información…", fn = function() end })

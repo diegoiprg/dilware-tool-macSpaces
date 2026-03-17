@@ -45,6 +45,9 @@ local function activate(on_done)
     local pcfg = cfg.presentation or {}
 
     -- Advertencia antes de reiniciar Finder/Dock
+    -- Nota: hs.dialog.blockAlert es síncrono y bloquea el event loop de Hammerspoon
+    -- mientras espera respuesta del usuario. Es aceptable aquí porque es una acción
+    -- explícita del usuario y la espera es breve e intencional.
     if pcfg.hide_desktop ~= false or pcfg.hide_dock ~= false then
         local btn = hs.dialog.blockAlert(
             "Activar modo presentación",

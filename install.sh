@@ -49,12 +49,12 @@ fi
 
 # Respaldar carpeta macspaces/ existente (con timestamp para no sobreescribir)
 if [ -d "${HS_DIR}/macspaces" ]; then
-  local_bak="${HS_DIR}/macspaces.bak"
-  if [ -d "${local_bak}" ]; then
-    mv "${local_bak}" "${local_bak}.$(date +%Y%m%d%H%M%S)"
+  bak_dir="${HS_DIR}/macspaces.bak"
+  if [ -d "${bak_dir}" ]; then
+    mv "${bak_dir}" "${bak_dir}.$(date +%Y%m%d%H%M%S)"
     echo "→ Respaldo anterior renombrado con timestamp"
   fi
-  cp -r "${HS_DIR}/macspaces" "${local_bak}"
+  cp -r "${HS_DIR}/macspaces" "${bak_dir}"
   echo "→ Respaldo guardado: macspaces.bak/"
 fi
 

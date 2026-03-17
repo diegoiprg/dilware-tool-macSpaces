@@ -131,7 +131,8 @@ function M.stop()
 
     if cfg.pomodoro.enable_dnd then dnd.disable() end
     utils.log("[INFO] Pomodoro detenido")
-    utils.notify("Pomodoro", "Temporizador detenido. " .. completed .. " ciclo" .. (completed == 1 and "" or "s") .. " completado" .. (completed == 1 and "" or "s") .. ".")
+    local ciclos_str = completed == 1 and "1 ciclo completado" or (completed .. " ciclos completados")
+    utils.notify("Pomodoro", "Temporizador detenido. " .. ciclos_str .. ".")
 end
 
 -- Salta a la siguiente fase manualmente

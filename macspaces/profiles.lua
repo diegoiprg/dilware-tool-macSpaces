@@ -65,6 +65,11 @@ function M.activate(key, on_done)
         utils.log("[INFO] Espacio " .. tostring(new_space) .. " creado para " .. profile.name)
 
         hs.timer.doAfter(cfg.delay.medium, function()
+            local app_count = #profile.apps
+            -- on_done se llama solo después de que TODAS las apps hayan intentado moverse
+            -- El último timer es: app_launch * (n-1) + app_launch = app_launch * n
+            local total_delay = cfg.delay.app_launch * app_count
+
             for i, app_name in ipairs(profile.apps) do
                 hs.timer.doAfter(cfg.delay.app_launch * (i - 1), function()
                     hs.application.launchOrFocus(app_name)
@@ -85,8 +90,11 @@ function M.activate(key, on_done)
                 end)
             end
 
-            utils.notify("macSpaces", profile.name .. " activado")
-            if on_done then on_done() end
+            -- Notificar y llamar on_done después de que todos los timers de apps hayan terminado
+            hs.timer.doAfter(total_delay, function()
+                utils.notify("macSpaces", profile.name .. " activado")
+                if on_done then on_done() end
+            end)
         end)
     end)
 end

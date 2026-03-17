@@ -2,6 +2,24 @@
 
 Registro de cambios del proyecto `dilware-tool-macSpaces`.
 
+## [2.4.0] - 2026-03-16
+
+### Corregido
+- `profiles.lua`: `on_done` y la notificación "activado" ahora se llaman después de que TODOS los timers de lanzamiento de apps hayan terminado — antes se llamaban prematuramente, antes de que las apps estuvieran en su espacio
+- `history.lua`: `prune_old_entries()` ya no modifica la tabla mientras itera con `pairs()` — comportamiento indefinido en Lua 5.4; ahora recolecta claves a eliminar en una lista separada y las borra en un segundo paso
+- `clipboard.lua`: deduplicación de imágenes consecutivas corregida — antes `history[1].label == "[Imagen]"` ignoraba cualquier imagen si la anterior también era imagen; ahora se compara por tipo directamente
+- `menu.lua`: guard para `battery.percentage()` nil en el ítem de batería — `math.floor(nil)` causaba crash en el instante de inicialización; ahora muestra "?%" como fallback
+- `install.sh`: variable `local_bak` renombrada a `bak_dir` — `local` fuera de función es inválido en bash estricto y puede causar error en shells distintos de bash
+
+### Mejorado
+- `init.lua`: `package.path` ya no acumula rutas duplicadas en recargas sucesivas (`hs.reload`) — se verifica si la ruta ya está incluida antes de concatenar
+- `vpn.lua`: eliminado wrapper `info_item()` local que solo delegaba a `utils.info_item()` — código muerto/redundante
+- `pomodoro.lua`: mensaje de notificación al detener simplificado — pluralización más legible y mantenible
+- `presentation.lua`: documentado que `hs.dialog.blockAlert` es síncrono e intencional en este contexto
+
+### Cambiado
+- Versión bumpeada a v2.4.0
+
 ## [2.3.1] - 2026-03-16
 
 ### Corregido

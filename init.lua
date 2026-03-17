@@ -3,14 +3,18 @@
 -- https://github.com/diegoiprg/dilware-tool-macSpaces
 
 -- ─────────────────────────────────────────────
--- Punto de entrada de macSpaces v2.3.1
+-- Punto de entrada de macSpaces v2.4.0
 -- Carga módulos y arranca el sistema.
 -- ─────────────────────────────────────────────
 
 local hs_dir = os.getenv("HOME") .. "/.hammerspoon"
-package.path = hs_dir .. "/?.lua;" ..
-               hs_dir .. "/?/init.lua;" ..
-               package.path
+-- Evitar duplicar rutas en package.path en recargas sucesivas (hs.reload)
+local hs_lua_path = hs_dir .. "/?.lua"
+if not package.path:find(hs_lua_path, 1, true) then
+    package.path = hs_lua_path .. ";" ..
+                   hs_dir .. "/?/init.lua;" ..
+                   package.path
+end
 
 local utils     = require("macspaces.utils")
 local cfg       = require("macspaces.config")

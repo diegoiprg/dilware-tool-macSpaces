@@ -43,16 +43,20 @@ end
 -- Elimina entradas con más de 30 días de antigüedad
 local function prune_old_entries(data)
     local cutoff = os.time() - (30 * 24 * 3600)
+    -- Recolectar claves a eliminar primero para no modificar la tabla durante la iteración
+    local to_delete = {}
     for date_key in pairs(data) do
-        -- date_key tiene formato "YYYY-MM-DD"
         local y, m, d = date_key:match("^(%d+)-(%d+)-(%d+)$")
         if y then
             local entry_time = os.time({ year = tonumber(y), month = tonumber(m), day = tonumber(d) })
             if entry_time < cutoff then
-                data[date_key] = nil
-                utils.log("[INFO] history: entrada antigua eliminada (" .. date_key .. ")")
+                table.insert(to_delete, date_key)
             end
         end
+    end
+    for _, date_key in ipairs(to_delete) do
+        data[date_key] = nil
+        utils.log("[INFO] history: entrada antigua eliminada (" .. date_key .. ")")
     end
     return data
 end

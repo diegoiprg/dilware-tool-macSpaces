@@ -82,7 +82,9 @@ local function build_items()
     local bat = battery.status_label()
     if bat then
         -- Clic copia el porcentaje al portapapeles
-        local pct_str = tostring(math.floor(battery.percentage())) .. "%"
+        -- Guard: percentage() puede devolver nil en el instante de inicialización
+        local pct_raw = battery.percentage()
+        local pct_str = pct_raw and (tostring(math.floor(pct_raw)) .. "%") or "?%"
         table.insert(items, {
             title = bat,
             fn    = function() hs.pasteboard.setContents(pct_str) end,

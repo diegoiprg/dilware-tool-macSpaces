@@ -52,8 +52,12 @@ local function capture_entry()
         entry.label   = "[Contenido no previsualizable]"
     end
 
-    -- Evitar duplicados consecutivos
-    if #history > 0 and history[1].label == entry.label then return end
+    -- Evitar duplicados consecutivos de texto; para imágenes comparar por timestamp aproximado
+    if #history > 0 then
+        local last = history[1]
+        if entry.type == "text" and last.type == "text" and last.label == entry.label then return end
+        if entry.type == "image" and last.type == "image" then return end
+    end
 
     table.insert(history, 1, entry)
 
