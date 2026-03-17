@@ -1,6 +1,6 @@
 # Changelog
 
-Registro de cambios del proyecto `dilware-tool-macSpaces`.
+Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
 ## [2.4.0] - 2026-03-16
 

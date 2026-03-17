@@ -1,4 +1,4 @@
-# ⌘ macSpaces — Control de Entorno para macOS
+# ⌘ Gestor de entorno macOS — Tool
 
 ![Versión](https://img.shields.io/badge/versión-v2.4.0-6366f1?style=flat-square)
 ![Licencia](https://img.shields.io/badge/licencia-GPLv3-a855f7?style=flat-square)
@@ -55,7 +55,7 @@ Funciona en segundo plano, sin ventanas extra ni configuraciones complicadas. To
 ## Instalación
 
 ```bash
-curl -sL https://raw.githubusercontent.com/diegoiprg/dilware-tool-macSpaces/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/diegoiprg/dilware-tool-macGestorEntorno/main/install.sh | bash
 ```
 
 Después abre Hammerspoon y presiona ⌘R para recargar. El ícono ⌘ aparecerá en tu barra de menú.
