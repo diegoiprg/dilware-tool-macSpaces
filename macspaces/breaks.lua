@@ -1,12 +1,17 @@
 -- macspaces/breaks.lua
 -- Recordatorios de descanso activo para salud postural y visual.
+-- Rastrea tiempo sin descanso para incentivar pausas.
 
 local M = {}
 
 local cfg   = require("macspaces.config")
 local utils = require("macspaces.utils")
 
-local state = { enabled = cfg.breaks.enabled, timer = nil }
+local state = {
+    enabled       = cfg.breaks.enabled,
+    timer         = nil,
+    last_break_at = os.time(),  -- timestamp del último descanso (o arranque)
+}
 
 local BREAK_MESSAGES = {
     "Levántate y camina un par de minutos.",
@@ -29,9 +34,23 @@ end
 
 local function start_timer()
     stop_timer()
+    state.last_break_at = os.time()
     state.timer = hs.timer.doEvery(cfg.breaks.interval_minutes * 60, function()
         utils.notify("Descanso activo", next_message())
+        state.last_break_at = os.time()
     end)
+end
+
+-- Tiempo sin descanso en segundos
+function M.seconds_since_break()
+    return os.time() - state.last_break_at
+end
+
+-- Etiqueta para overlay: "⏱ 1:23 sin descanso"
+function M.idle_label()
+    local secs = M.seconds_since_break()
+    if secs < 300 then return nil end  -- no mostrar si < 5 min
+    return "⏱ " .. utils.format_time(secs) .. " sin descanso"
 end
 
 function M.is_enabled() return state.enabled end
@@ -57,6 +76,11 @@ function M.build_submenu(on_update)
         and ("◉  Activo — cada " .. cfg.breaks.interval_minutes .. " min")
         or  "○  Inactivo"
     table.insert(items, utils.disabled_item(status))
+
+    -- Mostrar tiempo sin descanso
+    local idle = M.idle_label()
+    if idle then table.insert(items, utils.disabled_item(idle)) end
+
     table.insert(items, { title = "-" })
 
     if state.enabled then

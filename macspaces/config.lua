@@ -59,7 +59,7 @@ M.pomodoro = {
 
 M.breaks = {
     interval_minutes = 50,
-    enabled          = false,
+    enabled          = true,
 }
 
 M.clipboard = {

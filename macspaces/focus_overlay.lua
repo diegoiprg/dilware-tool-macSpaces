@@ -1,28 +1,23 @@
 -- macspaces/focus_overlay.lua
 -- Banner flotante persistente que muestra el estado de enfoque activo.
--- Usa hs.canvas para un overlay semi-transparente en esquina superior derecha.
+-- Muestra: Pomodoro countdown, presentación, o tiempo sin descanso.
 
 local M = {}
 
 local pomodoro     = require("macspaces.pomodoro")
 local breaks       = require("macspaces.breaks")
 local presentation = require("macspaces.presentation")
-local utils        = require("macspaces.utils")
 
 local canvas = nil
 local timer  = nil
 
-local PADDING_X = 10
-local PADDING_Y = 6
-local MARGIN    = 8   -- margen desde el borde de pantalla
-local TOP_OFFSET = 30 -- debajo de la menubar
-local FONT_SIZE = 14
-local BG_ALPHA  = 0.75
-local CORNER_R  = 8
-
--- ─────────────────────────────────────────────
--- Determinar qué mostrar
--- ─────────────────────────────────────────────
+local PADDING_X  = 10
+local PADDING_Y  = 6
+local MARGIN     = 8
+local TOP_OFFSET = 30
+local FONT_SIZE  = 14
+local BG_ALPHA   = 0.75
+local CORNER_R   = 8
 
 local function get_label()
     if pomodoro.is_active() then
@@ -31,13 +26,9 @@ local function get_label()
     if presentation.is_active() then
         return "🎬 Presentación"
     end
-    -- Descanso activo no tiene countdown, no justifica overlay permanente
-    return nil
+    -- Mostrar tiempo sin descanso si es significativo (> 5 min)
+    return breaks.idle_label()
 end
-
--- ─────────────────────────────────────────────
--- Canvas
--- ─────────────────────────────────────────────
 
 local function destroy_canvas()
     if canvas then canvas:delete(); canvas = nil end
@@ -46,7 +37,6 @@ end
 local function create_canvas(label)
     destroy_canvas()
 
-    -- Medir texto para dimensionar el canvas
     local text_style = {
         font = { name = ".AppleSystemUIFont", size = FONT_SIZE },
         color = { white = 1, alpha = 1 },
@@ -56,7 +46,6 @@ local function create_canvas(label)
     local w = size.w + PADDING_X * 2
     local h = size.h + PADDING_Y * 2
 
-    -- Posicionar en esquina superior derecha
     local screen = hs.screen.mainScreen():frame()
     local x = screen.x + screen.w - w - MARGIN
     local y = screen.y + TOP_OFFSET
@@ -65,9 +54,7 @@ local function create_canvas(label)
     canvas:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces + hs.canvas.windowBehaviors.stationary)
     canvas:level(hs.canvas.windowLevels.floating)
     canvas:clickActivating(false)
-    canvas:mouseCallback(nil)
 
-    -- Fondo
     canvas[1] = {
         type             = "rectangle",
         fillColor        = { white = 0, alpha = BG_ALPHA },
@@ -77,19 +64,14 @@ local function create_canvas(label)
         action           = "strokeAndFill",
     }
 
-    -- Texto
     canvas[2] = {
-        type = "text",
-        text = styled,
+        type  = "text",
+        text  = styled,
         frame = { x = PADDING_X, y = PADDING_Y, w = size.w, h = size.h },
     }
 
     canvas:show()
 end
-
--- ─────────────────────────────────────────────
--- Actualización
--- ─────────────────────────────────────────────
 
 local function update()
     local label = get_label()
@@ -100,16 +82,9 @@ local function update()
     end
 end
 
--- ─────────────────────────────────────────────
--- API pública
--- ─────────────────────────────────────────────
-
 function M.start()
     update()
-    -- Actualizar cada segundo (para countdown del Pomodoro)
-    if not timer then
-        timer = hs.timer.doEvery(1, update)
-    end
+    if not timer then timer = hs.timer.doEvery(1, update) end
 end
 
 function M.stop()
@@ -117,8 +92,6 @@ function M.stop()
     destroy_canvas()
 end
 
-function M.refresh()
-    update()
-end
+function M.refresh() update() end
 
 return M
