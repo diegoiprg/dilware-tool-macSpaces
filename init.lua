@@ -21,6 +21,10 @@ local hotkeys   = require("macspaces.hotkeys")
 local clipboard = require("macspaces.clipboard")
 local network   = require("macspaces.network")
 local vpn       = require("macspaces.vpn")
+local bluetooth = require("macspaces.bluetooth")
+local browsers  = require("macspaces.browsers")
+local music     = require("macspaces.music")
+local battery   = require("macspaces.battery")
 local menu      = require("macspaces.menu")
 
 local ok, err = pcall(function()
@@ -51,7 +55,6 @@ if not ok then
 end
 
 utils.clear_log()
--- BUG-01: Versión unificada desde cfg.VERSION (fuente única de verdad)
 utils.log("[INFO] macSpaces v" .. cfg.VERSION .. " iniciado")
 
 clipboard.start()
@@ -59,3 +62,22 @@ network.refresh()
 vpn.refresh()
 hotkeys.register(function() menu.build() end)
 menu.init()
+
+-- ─────────────────────────────────────────────
+-- PERF: Pre-calentar cachés costosos en segundo plano
+-- para que el menú abra instantáneamente.
+-- ─────────────────────────────────────────────
+
+local function prewarm_caches()
+    bluetooth.devices()   -- ioreg (el más lento, ~500ms-2s)
+    browsers.installed()  -- hs.urlevent handlers
+    browsers.current()
+    battery.has_battery()
+    music.is_running()    -- AppleScript
+end
+
+-- Pre-calentar al inicio (diferido para no bloquear el arranque)
+hs.timer.doAfter(1, prewarm_caches)
+
+-- Refrescar cachés cada 30 segundos en segundo plano
+hs.timer.doEvery(30, prewarm_caches)

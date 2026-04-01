@@ -42,21 +42,30 @@ local function detect_vpn_interfaces()
 end
 
 -- ─────────────────────────────────────────────
--- Caché
+-- Caché unificado: interfaces + info remota
 -- ─────────────────────────────────────────────
 
 local cache = {
-    -- Caché de is_active para evitar recalcular en cada apertura del menú
-    active       = nil,
-    active_fetch = 0,
-    active_ttl   = 10,
-    -- Caché de info remota del túnel
+    ifaces       = nil,
+    ifaces_fetch = 0,
+    ifaces_ttl   = 10,
     data         = nil,
     fetching     = false,
     last_ip      = nil,
     last_fetch   = 0,
     ttl          = 120,
 }
+
+-- Devuelve interfaces desde caché (evita llamar detect_vpn_interfaces múltiples veces)
+local function cached_interfaces()
+    local now = os.time()
+    if cache.ifaces and (now - cache.ifaces_fetch) < cache.ifaces_ttl then
+        return cache.ifaces
+    end
+    cache.ifaces = detect_vpn_interfaces()
+    cache.ifaces_fetch = now
+    return cache.ifaces
+end
 
 local function normalize_response(data)
     return {
@@ -84,7 +93,6 @@ local function fetch_tunnel_info(tunnel_ip, on_done)
     end
 
     cache.fetching = true
-    utils.log("[INFO] vpn: consultando ipapi.co para túnel")
 
     local url = "https://ipapi.co/" .. tunnel_ip .. "/json/"
 
@@ -96,12 +104,7 @@ local function fetch_tunnel_info(tunnel_ip, on_done)
                 cache.data       = normalize_response(data)
                 cache.last_ip    = tunnel_ip
                 cache.last_fetch = os.time()
-                utils.log("[OK] vpn: info obtenida para túnel")
-            else
-                utils.log("[WARN] vpn: respuesta inválida de ipapi.co")
             end
-        else
-            utils.log("[WARN] vpn: no se pudo consultar ipapi.co (status " .. tostring(status) .. ")")
         end
         if on_done then on_done() end
     end)
@@ -112,22 +115,16 @@ end
 -- ─────────────────────────────────────────────
 
 function M.is_active()
-    local now = os.time()
-    if cache.active ~= nil and (now - cache.active_fetch) < cache.active_ttl then
-        return cache.active
-    end
-    cache.active = #detect_vpn_interfaces() > 0
-    cache.active_fetch = now
-    return cache.active
+    return #cached_interfaces() > 0
 end
 
 function M.interfaces()
-    return detect_vpn_interfaces()
+    return cached_interfaces()
 end
 
 function M.refresh(on_done)
-    cache.active = nil  -- invalidar caché de is_active
-    local ifaces = detect_vpn_interfaces()
+    cache.ifaces = nil; cache.ifaces_fetch = 0  -- invalidar
+    local ifaces = cached_interfaces()
     if #ifaces > 0 and ifaces[1].ip then
         fetch_tunnel_info(ifaces[1].ip, on_done)
     else
@@ -137,7 +134,7 @@ function M.refresh(on_done)
 end
 
 function M.build_submenu(on_update)
-    local ifaces = detect_vpn_interfaces()
+    local ifaces = cached_interfaces()  -- usa caché, no recalcula
     local items  = {}
 
     if #ifaces == 0 then
@@ -175,8 +172,7 @@ function M.build_submenu(on_update)
     table.insert(items, {
         title = "Actualizar",
         fn    = function()
-            cache.data = nil
-            cache.active = nil
+            cache.data = nil; cache.ifaces = nil; cache.ifaces_fetch = 0
             M.refresh(on_update)
         end,
     })
