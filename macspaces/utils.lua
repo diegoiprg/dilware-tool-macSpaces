@@ -56,6 +56,14 @@ function M.notify(title, msg)
     M.log(string.format("[NOTIFY] %s — %s", title, msg))
 end
 
+-- Notificación llamativa: sonido del sistema + overlay en pantalla + notificación estándar
+function M.alert_notify(title, msg)
+    M.notify(title, msg)
+    hs.alert.show(title .. "\n" .. msg, { textSize = 26 }, hs.screen.mainScreen(), 4)
+    local sound = hs.sound.getByName("Glass")
+    if sound then sound:play() end
+end
+
 -- Verifica si un valor existe en una tabla indexada
 function M.table_contains(tbl, item)
     for _, v in ipairs(tbl) do

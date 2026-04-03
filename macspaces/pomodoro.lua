@@ -54,7 +54,7 @@ local function notify_phase(phase)
         short_break = "Pausa corta — " .. cfg.pomodoro.short_break .. " min.",
         long_break  = "Pausa larga — " .. cfg.pomodoro.long_break .. " min.",
     }
-    utils.notify("Pomodoro", (msgs[phase] or phase) .. "\n" .. next_tip())
+    utils.alert_notify("Pomodoro", (msgs[phase] or phase) .. "\n" .. next_tip())
 end
 
 local function remaining_seconds()

@@ -49,7 +49,7 @@ local function start_timer()
     stop_timer()
     state.last_break_at = os.time()
     state.timer = hs.timer.doEvery(cfg.breaks.interval_minutes * 60, function()
-        utils.notify("Descanso activo", next_message())
+        utils.alert_notify("Descanso activo", next_message())
         state.last_break_at = os.time()
     end)
 end
