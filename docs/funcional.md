@@ -1,4 +1,4 @@
-# Especificación Funcional — macSpaces v2.8.0
+# Especificación Funcional — macSpaces v2.9.0
 
 ## Propósito
 

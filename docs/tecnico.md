@@ -1,4 +1,4 @@
-# Referencia Técnica — macSpaces v2.8.0
+# Referencia Técnica — macSpaces v2.9.0
 
 ## API de módulos
 

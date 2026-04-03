@@ -2,6 +2,16 @@
 
 Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
+## [2.9.0] - 2026-04-02
+
+### Agregado
+- `utils.lua`: nueva función `alert_notify()` — alerta llamativa con sonido del sistema ("Glass") + overlay grande en pantalla (4s, 26pt) + notificación estándar de macOS
+
+### Cambiado
+- `pomodoro.lua`: transiciones de fase usan `alert_notify()` en lugar de `notify()` — imposible ignorar el cambio de fase
+- `breaks.lua`: recordatorios de descanso activo usan `alert_notify()` — más visibles durante sesiones de concentración
+- Versión bumpeada a v2.9.0
+
 ## [2.8.0] - 2026-04-02
 
 ### Agregado

@@ -1,4 +1,4 @@
-# Arquitectura — macSpaces v2.8.0
+# Arquitectura — macSpaces v2.9.0
 
 ## Visión general
 
