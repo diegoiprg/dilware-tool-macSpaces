@@ -10,6 +10,7 @@ local utils = require("macspaces.utils")
 local state = {
     enabled       = cfg.breaks.enabled,
     timer         = nil,
+    display_timer = nil,
     last_break_at = os.time(),
 }
 
@@ -39,6 +40,7 @@ local function next_message()
 end
 
 local function stop_timer()
+    if state.display_timer then state.display_timer:stop(); state.display_timer = nil end
     if state.timer then state.timer:stop(); state.timer = nil end
 end
 
@@ -48,9 +50,10 @@ local function schedule_next()
     local interval = cfg.breaks.interval_minutes * 60
     local display  = cfg.breaks.break_display_seconds or 15
     state.timer = hs.timer.doAfter(interval, function()
+        state.last_break_at = os.time()
         utils.alert_notify("Descanso activo", next_message(), display)
-        -- El siguiente ciclo inicia DESPUÉS de que termine la visualización
-        hs.timer.doAfter(display, function()
+        state.display_timer = hs.timer.doAfter(display, function()
+            state.display_timer = nil
             if state.enabled then schedule_next() end
         end)
     end)
@@ -86,6 +89,10 @@ end
 
 function M.toggle(on_update)
     if state.enabled then M.disable(on_update) else M.enable(on_update) end
+end
+
+function M.handle_wake()
+    if state.enabled then schedule_next() end
 end
 
 function M.build_submenu(on_update)

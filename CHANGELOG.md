@@ -2,6 +2,18 @@
 
 Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
+## [2.10.0] - 2026-04-05
+
+### Corregido
+- `breaks.lua`: contador se congelaba en `00:00` durante la visualización del mensaje — `last_break_at` ahora se actualiza al disparar el break, no al finalizar el display
+- `breaks.lua`: `display_timer` ahora tiene referencia guardada en state → se puede cancelar si el usuario deshabilita breaks durante el display
+- `pomodoro.lua`: timer tick puede congelarse tras suspensión del sistema — ahora se reinicia en el handler de wake
+- `init.lua`: agregado `hs.caffeinate.watcher` para detectar `systemDidWake` y `screensDidWake` → reinicia ciclos de breaks y pomodoro (trata la suspensión como ciclo nuevo)
+
+### Cambiado
+- `pomodoro.lua`: extraída función `advance_phase()` para eliminar duplicación de lógica de transición
+- Versión bumpeada a v2.10.0
+
 ## [2.9.2] - 2026-04-04
 
 ### Cambiado

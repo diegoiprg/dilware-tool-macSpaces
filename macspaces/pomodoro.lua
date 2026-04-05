@@ -63,6 +63,8 @@ local function remaining_seconds()
     return r > 0 and r or 0
 end
 
+local advance_phase
+
 local function start_phase(phase)
     state.phase = phase
     local durations = {
@@ -87,20 +89,24 @@ local function start_phase(phase)
 
         if state.seconds_left <= 0 then
             stop_timer()
-            if phase == "work" then
-                state.cycle = state.cycle + 1
-                if state.cycle % cfg.pomodoro.cycles_before_long_break == 0 then
-                    start_phase("long_break")
-                else
-                    start_phase("short_break")
-                end
-            else
-                start_phase("work")
-            end
+            advance_phase()
             update_menubar()
         end
     end)
     update_menubar()
+end
+
+advance_phase = function()
+    if state.phase == "work" then
+        state.cycle = state.cycle + 1
+        if state.cycle % cfg.pomodoro.cycles_before_long_break == 0 then
+            start_phase("long_break")
+        else
+            start_phase("short_break")
+        end
+    else
+        start_phase("work")
+    end
 end
 
 function M.is_active()       return state.active end
@@ -146,15 +152,28 @@ end
 function M.skip()
     if not state.active then return end
     stop_timer()
-    if state.phase == "work" then
-        state.cycle = state.cycle + 1
-        if state.cycle % cfg.pomodoro.cycles_before_long_break == 0 then
-            start_phase("long_break")
-        else
-            start_phase("short_break")
-        end
+    advance_phase()
+end
+
+function M.handle_wake()
+    if not state.active then return end
+    local r = remaining_seconds()
+    if r <= 0 then
+        stop_timer()
+        advance_phase()
+        update_menubar()
     else
-        start_phase("work")
+        state.seconds_left = r
+        stop_timer()
+        state.timer = hs.timer.doEvery(1, function()
+            state.seconds_left = remaining_seconds()
+            if state.seconds_left <= 0 then
+                stop_timer()
+                advance_phase()
+                update_menubar()
+            end
+        end)
+        update_menubar()
     end
 end
 

@@ -64,6 +64,20 @@ hotkeys.register(function() menu.build() end)
 menu.init()
 focus_menu.init()
 
+local breaks_mod   = require("macspaces.breaks")
+local pomodoro_mod = require("macspaces.pomodoro")
+
+local caffeinate_watcher = hs.caffeinate.watcher.new(function(event)
+    if event == hs.caffeinate.watcher.systemDidWake or
+       event == hs.caffeinate.watcher.screensDidWake then
+        utils.log("[INFO] Wake detectado — reiniciando ciclos de breaks y pomodoro")
+        breaks_mod.handle_wake()
+        pomodoro_mod.handle_wake()
+        menu.build()
+    end
+end)
+caffeinate_watcher:start()
+
 -- Pre-calentar cachés costosos en segundo plano
 local function prewarm_caches()
     bluetooth.devices()
@@ -94,6 +108,7 @@ hs.shutdownCallback = function()
     hotkeys.unregister()
     if breaks.is_enabled() then breaks.disable() end
     if prewarm_timer then prewarm_timer:stop() end
+    caffeinate_watcher:stop()
 
     utils.log("[INFO] macSpaces: limpieza completada")
 end
