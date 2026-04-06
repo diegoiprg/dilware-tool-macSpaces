@@ -131,11 +131,10 @@ Notificaciones incluyen datos educativos rotativos (Cirillo, Baumeister, Dehaene
 |---|---|
 | `M.is_enabled()` | `true` si está activo (default: `true`) |
 | `M.init()` | Arranca el timer si está habilitado en config (llamado al inicio) |
-| `M.seconds_since_break()` | Segundos desde el último descanso |
-| `M.idle_label()` | `"◎ Descanso · 48:30"` (countdown regresivo) o `nil` si desactivado |
+| `M.idle_label()` | `"◎ Descanso · 48:30"` (countdown hacia próximo break) o `nil` si desactivado o break en curso |
 | `M.enable(on_update)` / `M.disable(on_update)` / `M.toggle(on_update)` | Control |
 | `M.handle_wake()` | Reinicia ciclo de descanso al despertar el sistema |
-| `M.build_submenu(on_update)` | Ítems del submenú (incluye tiempo sin descanso) |
+| `M.build_submenu(on_update)` | Ítems del submenú (incluye countdown al próximo break) |
 
 Notificaciones incluyen datos educativos rotativos (AAO, OSHA, Mayo Clinic, Cornell, AHA).
 

@@ -11,7 +11,7 @@ local state = {
     enabled       = cfg.breaks.enabled,
     timer         = nil,
     display_timer = nil,
-    last_break_at = os.time(),
+    next_break_at = nil,   -- tiempo absoluto en que disparará el próximo break
 }
 
 -- Mensajes con instrucciones paso a paso + dato educativo de respaldo
@@ -46,11 +46,12 @@ end
 
 local function schedule_next()
     stop_timer()
-    state.last_break_at = os.time()
     local interval = cfg.breaks.interval_minutes * 60
     local display  = cfg.breaks.break_display_seconds or 15
+    state.next_break_at = os.time() + interval
     state.timer = hs.timer.doAfter(interval, function()
-        state.last_break_at = os.time()
+        state.timer = nil
+        state.next_break_at = nil   -- break en curso; no mostrar countdown
         utils.alert_notify("Descanso activo", next_message(), display)
         state.display_timer = hs.timer.doAfter(display, function()
             state.display_timer = nil
@@ -59,13 +60,10 @@ local function schedule_next()
     end)
 end
 
-function M.seconds_since_break()
-    return os.time() - state.last_break_at
-end
-
 function M.idle_label()
     if not state.enabled then return nil end
-    local remaining = (cfg.breaks.interval_minutes * 60) - M.seconds_since_break()
+    if not state.next_break_at then return nil end
+    local remaining = state.next_break_at - os.time()
     if remaining < 0 then remaining = 0 end
     return "◎ Descanso · " .. utils.format_time(remaining)
 end
