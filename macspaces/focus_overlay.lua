@@ -81,11 +81,11 @@ local function get_entries()
         table.insert(entries, { label = idle, color = color })
     end
     -- Claude: se muestra siempre que haya sesión activa (va después de breaks)
-    local cl_label = claude.overlay_label()
-    if cl_label and not cl_label:find("sin sesión") then
-        local cl_data = claude.fetch()
-        local pct = cl_data.five_hour and cl_data.five_hour.pct or 0
-        table.insert(entries, { label = cl_label, color = claude.color_for(pct) })
+    local cl_rows = claude.overlay_rows()
+    if not cl_rows[1].label:find("sin sesión") then
+        for _, row in ipairs(cl_rows) do
+            table.insert(entries, { label = row.label, color = claude.color_for(row.pct) })
+        end
     end
     return entries
 end

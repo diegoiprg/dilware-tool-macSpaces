@@ -1,6 +1,6 @@
 -- macspaces/claude.lua
 -- Monitor de uso de Claude Code y Claude.ai
--- Fuente: ~/.claude/history.jsonl (Claude Code) + cookie Safari (Claude.ai)
+-- Fuente: ~/.claude/usage_cache.json (escrito por statusline.sh)
 
 local M = {}
 
@@ -26,90 +26,42 @@ local function fmt_reset(epoch)
     return m .. "m"
 end
 
--- Lee el último archivo JSONL de Claude Code y extrae rate_limits
+-- Lee ~/.claude/usage_cache.json generado por statusline.sh
 local function read_from_claude_code()
     local home = os.getenv("HOME") or ""
-    local claude_dir = home .. "/.claude"
+    local cache_path = home .. "/.claude/usage_cache.json"
 
-    -- Buscar el jsonl más reciente en projects/
-    local handle = io.popen(
-        "find '" .. claude_dir .. "/projects' -name '*.jsonl' " ..
-        "! -path '*/subagents/*' -newer '" .. claude_dir .. "/history.jsonl' " ..
-        "2>/dev/null | head -1"
-    )
-    local latest = handle and handle:read("*l")
-    if handle then handle:close() end
-
-    -- Fallback a history.jsonl
-    if not latest or latest == "" then
-        latest = claude_dir .. "/history.jsonl"
-    end
-
-    local f = io.open(latest, "r")
+    local f = io.open(cache_path, "r")
     if not f then return nil end
-
-    -- Leer las últimas líneas buscando rate_limits
-    local lines = {}
-    for line in f:lines() do
-        table.insert(lines, line)
-        if #lines > 200 then table.remove(lines, 1) end
-    end
+    local raw = f:read("*a")
     f:close()
 
-    -- Buscar en reversa la entrada más reciente con rate_limits
-    for i = #lines, 1, -1 do
-        local ok, data = pcall(hs.json.decode, lines[i])
-        if ok and data then
-            local rl = data.rate_limits or
-                       (data.message and data.message.rate_limits) or
-                       (data.summary and data.summary.rate_limits)
-            if rl and rl.five_hour then
-                return {
-                    five_hour = {
-                        pct   = math.floor(rl.five_hour.used_percentage or 0),
-                        reset = rl.five_hour.resets_at or 0,
-                    },
-                    seven_day = {
-                        pct   = math.floor((rl.seven_day and rl.seven_day.used_percentage) or 0),
-                        reset = (rl.seven_day and rl.seven_day.resets_at) or 0,
-                    },
-                    source = "code",
-                }
-            end
-        end
-    end
-    return nil
+    if not raw or raw == "" then return nil end
+
+    local ok, data = pcall(hs.json.decode, raw)
+    if not ok or not data then return nil end
+
+    -- Ignorar cache con más de 6 horas de antigüedad
+    local updated_at = data.updated_at or 0
+    if (os.time() - updated_at) > 21600 then return nil end
+
+    local fh = data.five_hour
+    if not fh then return nil end
+
+    return {
+        five_hour = {
+            pct   = fh.pct or 0,
+            reset = fh.reset or 0,
+        },
+        seven_day = {
+            pct   = (data.seven_day and data.seven_day.pct) or 0,
+            reset = (data.seven_day and data.seven_day.reset) or 0,
+        },
+        source = "code",
+    }
 end
 
--- Obtiene cookie de sesión de Safari para claude.ai
-local function get_safari_cookie()
-    local home = os.getenv("HOME") or ""
-    -- Safari guarda cookies en BinaryCookies — necesitamos python para leerlo
-    local cmd = [[python3 -c "
-import subprocess, sys
-try:
-    r = subprocess.run(
-        ['python3', '-c',
-         'import http.cookiejar, urllib.request; j=http.cookiejar.MozillaCookieJar(); '
-         'print(\"ok\")'],
-        capture_output=True)
-    # Intentar leer cookie via osascript/safari
-    import os
-    cookie_db = os.path.expanduser(
-        '~/Library/Containers/com.apple.Safari/Data/Library/Cookies/Cookies.binarycookies')
-    if os.path.exists(cookie_db):
-        print('found')
-    else:
-        print('notfound')
-except:
-    print('error')
-" 2>/dev/null]]
-    -- Por ahora retorna nil — la autenticación Safari requiere un helper separado
-    -- que se implementará en la siguiente iteración
-    return nil
-end
-
--- Fetch principal: intenta Claude Code primero, luego API web
+-- Fetch principal
 function M.fetch()
     local now = os.time()
     if cache.data and (now - cache.last_fetch) < cache.ttl then
@@ -118,7 +70,6 @@ function M.fetch()
 
     local data = read_from_claude_code()
     if not data then
-        -- Sin sesión activa de Claude Code
         data = { source = "none" }
     end
 
@@ -153,16 +104,33 @@ function M.color_for(pct)
     end
 end
 
--- Texto de la fila para el overlay
-function M.overlay_label()
+-- Filas para el overlay: retorna tabla con 1 o 2 entradas { label, pct }
+function M.overlay_rows()
     local d = M.fetch()
     if d.source == "none" or not d.five_hour then
-        return "✦ Claude  —  sin sesión activa"
+        return {{ label = "✦ Claude  —  sin sesión activa", pct = 0 }}
     end
+
     local fh = d.five_hour
-    local b = bar(fh.pct, 8)
-    local reset = fmt_reset(fh.reset)
-    return string.format("✦ Claude  %s %d%%  ↺%s", b, fh.pct, reset)
+    local sd = d.seven_day or { pct = 0, reset = 0 }
+
+    local rows = {}
+    table.insert(rows, {
+        label = string.format("✦ Claude 5h  %s %d%%  ↺%s", bar(fh.pct, 8), fh.pct, fmt_reset(fh.reset)),
+        pct   = fh.pct,
+    })
+    if sd.pct and sd.pct > 0 then
+        table.insert(rows, {
+            label = string.format("✦ Claude 7d  %s %d%%  ↺%s", bar(sd.pct, 8), sd.pct, fmt_reset(sd.reset)),
+            pct   = sd.pct,
+        })
+    end
+    return rows
+end
+
+-- Compatibilidad: retorna solo la primera fila como string
+function M.overlay_label()
+    return M.overlay_rows()[1].label
 end
 
 -- Construye el submenú para menu.lua
