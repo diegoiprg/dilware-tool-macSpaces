@@ -7,6 +7,7 @@ local M = {}
 local pomodoro     = require("macspaces.pomodoro")
 local breaks       = require("macspaces.breaks")
 local presentation = require("macspaces.presentation")
+local claude       = require("macspaces.claude")
 
 local canvas   = nil
 local timer    = nil
@@ -78,6 +79,13 @@ local function get_entries()
     if idle then
         local color = breaks.is_on_break() and BG_COLORS.breaks_active or BG_COLORS.breaks
         table.insert(entries, { label = idle, color = color })
+    end
+    -- Claude: se muestra siempre que haya sesión activa (va después de breaks)
+    local cl_label = claude.overlay_label()
+    if cl_label and not cl_label:find("sin sesión") then
+        local cl_data = claude.fetch()
+        local pct = cl_data.five_hour and cl_data.five_hour.pct or 0
+        table.insert(entries, { label = cl_label, color = claude.color_for(pct) })
     end
     return entries
 end

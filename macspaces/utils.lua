@@ -56,10 +56,57 @@ function M.notify(title, msg)
     M.log(string.format("[NOTIFY] %s — %s", title, msg))
 end
 
--- Notificación llamativa: sonido del sistema + overlay en pantalla + notificación estándar
+-- Canvas persistente para alertas de larga duración
+local _alert_canvas = nil
+local _alert_timer  = nil
+
+local function dismiss_alert_canvas()
+    if _alert_timer  then _alert_timer:stop();   _alert_timer  = nil end
+    if _alert_canvas then _alert_canvas:delete(); _alert_canvas = nil end
+end
+
+local function show_alert_canvas(title, msg, duration)
+    dismiss_alert_canvas()
+
+    local text    = title .. "\n\n" .. msg
+    local styled  = hs.styledtext.new(text, {
+        font  = { name = ".AppleSystemUIFont", size = 15 },
+        color = { white = 1, alpha = 1 },
+    })
+    local screen  = hs.screen.mainScreen():fullFrame()
+    local pad     = 24
+    local max_w   = math.min(520, screen.w - pad * 2)
+    local size    = hs.drawing.getTextDrawingSize(styled) or { w = max_w, h = 200 }
+    local cw      = math.min(size.w + pad * 2, max_w + pad * 2)
+    local ch      = size.h + pad * 2
+    local cx      = screen.x + (screen.w - cw) / 2
+    local cy      = screen.y + screen.h * 0.25
+
+    _alert_canvas = hs.canvas.new({ x = cx, y = cy, w = cw, h = ch })
+    _alert_canvas:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces + hs.canvas.windowBehaviors.stationary)
+    _alert_canvas:level(hs.canvas.windowLevels.floating)
+    _alert_canvas:clickActivating(false)
+    _alert_canvas[1] = {
+        type             = "rectangle",
+        fillColor        = { red = 0.10, green = 0.10, blue = 0.10, alpha = 0.92 },
+        strokeColor      = { white = 1, alpha = 0.15 },
+        strokeWidth      = 1,
+        roundedRectRadii = { xRadius = 12, yRadius = 12 },
+        action           = "strokeAndFill",
+    }
+    _alert_canvas[2] = {
+        type  = "text",
+        text  = styled,
+        frame = { x = pad, y = pad, w = cw - pad * 2, h = ch - pad * 2 },
+    }
+    _alert_canvas:show()
+    _alert_timer = hs.timer.doAfter(duration, dismiss_alert_canvas)
+end
+
+-- Notificación llamativa: sonido del sistema + canvas persistente + notificación estándar
 function M.alert_notify(title, msg, duration)
     M.notify(title, msg)
-    hs.alert.show(title .. "\n" .. msg, { textSize = 26 }, hs.screen.mainScreen(), duration or 4)
+    show_alert_canvas(title, msg, duration or 4)
     local sound = hs.sound.getByName("Glass")
     if sound then sound:play() end
 end

@@ -17,6 +17,7 @@ local vpn          = require("macspaces.vpn")
 local launcher     = require("macspaces.launcher")
 local music        = require("macspaces.music")
 local utils        = require("macspaces.utils")
+local claude       = require("macspaces.claude")
 
 local menubar = hs.menubar.new()
 local rebuild_timer = nil
@@ -126,6 +127,10 @@ local function build_items()
     -- ══ Historial ══
     table.insert(items, { title = "-" })
     table.insert(items, { title = "📊  Historial", menu = history.build_submenu() })
+
+    -- ══ Claude ══
+    table.insert(items, { title = "-" })
+    table.insert(items, { title = "✦  Claude", menu = claude.build_submenu() })
 
     -- ══ Sistema ══
     table.insert(items, { title = "-" })
