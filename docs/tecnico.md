@@ -1,4 +1,4 @@
-# Referencia Técnica — macSpaces v2.11.0
+# Referencia Técnica — macSpaces v2.11.1
 
 ## Tabla de contenido
 
@@ -321,11 +321,11 @@ Registra `pomodoro.set_menubar_updater()` para actualizar el ícono del menú de
 
 | Función | Descripción |
 |---|---|
-| `M.start()` | Carga posición guardada en disco, muestra overlay, arranca timer de actualización (1s) |
+| `M.start()` | Inicializa posición en memoria, muestra overlay, arranca timer de actualización (1s) |
 | `M.stop()` | Detiene timer, cancela drag tap, destruye canvas |
 | `M.refresh()` | Fuerza actualización inmediata del canvas |
 
-**Persistencia de posición**: guarda y carga `~/.hammerspoon/overlay_pos.json` con formato `{ x, y }`. La posición se actualiza al soltar el drag (`mouseUp`).
+**Posición en memoria**: la posición se guarda en una variable local durante la sesión. Al soltar el drag (`mouseUp`) se actualiza en memoria. La posición se resetea al recargar Hammerspoon — no hay persistencia en disco.
 
 **Detección de dispositivo**: `IS_MACBOOK` se determina una sola vez al cargar el módulo mediante `hs.host.localizedName():find("macbook")`. Si es MacBook, pasa `minimal=true` a `claude.overlay_rows()`.
 
@@ -372,14 +372,6 @@ El canvas usa `canJoinAllSpaces + stationary` para ser visible en todos los espa
 ```
 
 Ubicación: `~/.hammerspoon/macspaces_history.json`. Permisos 0600. Entradas > 30 días se eliminan automáticamente al registrar una sesión.
-
-### `overlay_pos.json`
-
-```json
-{ "x": 1200, "y": 850 }
-```
-
-Ubicación: `~/.hammerspoon/overlay_pos.json`. Posición del overlay en coordenadas de pantalla. Se guarda al soltar el drag. Si no existe, el overlay aparece en la esquina inferior derecha.
 
 ### `debug.log`
 

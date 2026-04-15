@@ -2,6 +2,11 @@
 
 Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
+## [2.11.1] - 2026-04-15
+
+### Eliminado
+- `focus_overlay.lua`: persistencia de posición en disco (`overlay_pos.json`) — eliminadas las funciones `load_pos()` y `save_pos()`, y la constante `POS_FILE`. La posición ahora se mantiene solo en memoria durante la sesión activa y se resetea al recargar Hammerspoon. El arrastre sigue funcionando dentro de la misma sesión.
+
 ## [2.11.0] - 2026-04-15
 
 ### Agregado

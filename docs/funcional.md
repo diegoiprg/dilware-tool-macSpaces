@@ -1,4 +1,4 @@
-# Especificación Funcional — macSpaces v2.11.0
+# Especificación Funcional — macSpaces v2.11.1
 
 ## Tabla de contenido
 
@@ -59,7 +59,7 @@ Banner unificado en esquina inferior derecha (posición configurable), visible e
 | Claude (media carga) | Amarillo | Ídem |
 | Claude (alta carga) | Rojo | Ídem |
 
-Arrastrable para reposicionar. La posición se persiste en disco (`overlay_pos.json`) y se restaura entre reinicios de Hammerspoon. Se oculta automáticamente cuando no hay ningún estado activo.
+Arrastrable para reposicionar. La posición se mantiene en memoria durante la sesión y se resetea al recargar Hammerspoon. Se oculta automáticamente cuando no hay ningún estado activo.
 
 ---
 
@@ -297,7 +297,7 @@ Al desactivar:
 
 Ítems fijos en el menú principal:
 
-- **Versión**: semver visible al final (`macSpaces v2.11.0`)
+- **Versión**: semver visible al final (`macSpaces v2.11.1`)
 - **Registro**: abre `~/.hammerspoon/debug.log` en Console.app
 - **Recargar**: ejecuta `hs.reload()` para aplicar cambios en config.lua
 
@@ -309,9 +309,9 @@ Al desactivar:
 
 El overlay es el canal de información pasiva de macSpaces. Se muestra solo cuando hay al menos un estado activo.
 
-**Posición**: persiste en disco entre reinicios. Por defecto: esquina inferior derecha de la pantalla primaria.
+**Posición**: se mantiene en memoria durante la sesión activa; se resetea al recargar Hammerspoon. Por defecto: esquina inferior derecha de la pantalla primaria.
 
-**Arrastre**: mouseDown inicia el drag via `hs.eventtap`. mouseUp persiste la nueva posición en `overlay_pos.json`.
+**Arrastre**: mouseDown inicia el drag via `hs.eventtap`. mouseUp actualiza la posición en memoria.
 
 **Detección de dispositivo**: en MacBook (detectado via `hs.host.localizedName()`), las filas de Claude usan formato compacto sin barra de progreso para evitar solapamiento con el Dock.
 
