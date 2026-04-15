@@ -13,29 +13,9 @@ local canvas   = nil
 local timer    = nil
 local drag_tap = nil
 
--- Posición persistente en disco por pantalla
-local POS_FILE = os.getenv("HOME") .. "/.hammerspoon/overlay_pos.json"
-
-local saved_pos = nil  -- { x, y } cargado de disco al inicio
+-- Posición guardada durante la sesión (se resetea al recargar Hammerspoon)
+local saved_pos = nil  -- { x, y }
 local drag = { active = false, ox = 0, oy = 0 }
-
--- Carga posición guardada desde disco (nil si no existe o es inválida)
-local function load_pos()
-    local f = io.open(POS_FILE, "r")
-    if not f then return nil end
-    local raw = f:read("*a"); f:close()
-    local ok, data = pcall(hs.json.decode, raw)
-    if ok and data and data.x and data.y then return data end
-    return nil
-end
-
--- Persiste posición en disco
-local function save_pos(x, y)
-    local f = io.open(POS_FILE, "w")
-    if not f then return end
-    f:write(hs.json.encode({ x = x, y = y }))
-    f:close()
-end
 
 -- ── Detección de dispositivo ──
 
@@ -199,7 +179,6 @@ local function render(entries)
                         if canvas then
                             local f = canvas:frame()
                             saved_pos = { x = f.x, y = f.y }
-                            save_pos(f.x, f.y)
                         end
                         drag.active = false
                         if drag_tap then drag_tap:stop() end
@@ -232,7 +211,6 @@ local function update()
 end
 
 function M.start()
-    if not saved_pos then saved_pos = load_pos() end
     update()
     if not timer then timer = hs.timer.doEvery(1, update) end
 end
