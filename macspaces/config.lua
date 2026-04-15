@@ -3,7 +3,7 @@
 
 local M = {}
 
-M.VERSION = "2.10.2"
+M.VERSION = "2.11.0"
 
 M.profile_order = { "personal", "work" }
 

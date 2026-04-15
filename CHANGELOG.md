@@ -2,6 +2,20 @@
 
 Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
+## [2.11.0] - 2026-04-15
+
+### Agregado
+- `focus_overlay.lua`: persistencia de posición del banner en disco (`~/.hammerspoon/overlay_pos.json`) — la posición se restaura entre reinicios de Hammerspoon
+- `focus_overlay.lua`: funciones `load_pos()` y `save_pos()` para lectura y escritura de posición en JSON
+- `focus_overlay.lua`: detección de dispositivo `IS_MACBOOK` via `hs.host.localizedName()` — habilita modo compacto automáticamente en MacBook
+
+### Cambiado
+- `focus_overlay.lua`: al soltar el drag se persiste la posición en disco (antes solo se guardaba en memoria durante la sesión)
+- `focus_overlay.lua`: posición por defecto usa `primaryScreen():fullFrame()` con guard de nil — evita crash si la pantalla no está disponible al arrancar
+- `focus_overlay.lua`: pasa `minimal=IS_MACBOOK` a `claude.overlay_rows()` — en MacBook el banner muestra formato compacto sin barra de progreso para evitar solapamiento con el Dock
+- `claude.lua`: barra de progreso actualizada de `█░` a `▰▱` — mejor alineación con Apple HIG
+- `claude.lua`: `overlay_rows()` acepta parámetro `minimal` (boolean) — en modo minimal omite la barra de progreso y muestra solo porcentaje y tiempo de reset
+
 ## [2.10.0] - 2026-04-05
 
 ### Corregido

@@ -85,12 +85,12 @@ end
 
 -- ── UI helpers ──────────────────────────────────────────────────────────────
 
--- Barra de progreso en texto: ████░░░░ 74%
+-- Barra de progreso en texto: ▰▰▰▰▱▱▱▱ 74%
 local function bar(pct, width)
     width = width or 8
     local filled = math.floor((pct / 100) * width)
     local empty = width - filled
-    return string.rep("█", filled) .. string.rep("░", empty)
+    return string.rep("▰", filled) .. string.rep("▱", empty)
 end
 
 -- Color semáforo según porcentaje
@@ -105,7 +105,8 @@ function M.color_for(pct)
 end
 
 -- Filas para el overlay: retorna tabla con 1 o 2 entradas { label, pct }
-function M.overlay_rows()
+-- minimal=true omite la barra de progreso (para MacBook)
+function M.overlay_rows(minimal)
     local d = M.fetch()
     if d.source == "none" or not d.five_hour then
         return {{ label = "✦ Claude  —  sin sesión activa", pct = 0 }}
@@ -115,15 +116,28 @@ function M.overlay_rows()
     local sd = d.seven_day or { pct = 0, reset = 0 }
 
     local rows = {}
-    table.insert(rows, {
-        label = string.format("✦ Claude 5h  %s %d%%  ↺%s", bar(fh.pct, 8), fh.pct, fmt_reset(fh.reset)),
-        pct   = fh.pct,
-    })
-    if sd.pct and sd.pct > 0 then
+    if minimal then
         table.insert(rows, {
-            label = string.format("✦ Claude 7d  %s %d%%  ↺%s", bar(sd.pct, 8), sd.pct, fmt_reset(sd.reset)),
-            pct   = sd.pct,
+            label = string.format("✦ Claude 5h  %d%%  ↺%s", fh.pct, fmt_reset(fh.reset)),
+            pct   = fh.pct,
         })
+        if sd.pct and sd.pct > 0 then
+            table.insert(rows, {
+                label = string.format("✦ Claude 7d  %d%%  ↺%s", sd.pct, fmt_reset(sd.reset)),
+                pct   = sd.pct,
+            })
+        end
+    else
+        table.insert(rows, {
+            label = string.format("✦ Claude 5h  %s %d%%  ↺%s", bar(fh.pct, 8), fh.pct, fmt_reset(fh.reset)),
+            pct   = fh.pct,
+        })
+        if sd.pct and sd.pct > 0 then
+            table.insert(rows, {
+                label = string.format("✦ Claude 7d  %s %d%%  ↺%s", bar(sd.pct, 8), sd.pct, fmt_reset(sd.reset)),
+                pct   = sd.pct,
+            })
+        end
     end
     return rows
 end

@@ -1,6 +1,6 @@
 -- macspaces/focus_overlay.lua
 -- Banner flotante unificado con filas coloreadas por estado.
--- Arrastrable para reposicionar durante la sesión.
+-- Arrastrable para reposicionar; posición persiste en disco entre reinicios.
 
 local M = {}
 
@@ -13,9 +13,33 @@ local canvas   = nil
 local timer    = nil
 local drag_tap = nil
 
--- Posición guardada durante la sesión (nil = posición por defecto)
-local saved_pos = nil
+-- Posición persistente en disco por pantalla
+local POS_FILE = os.getenv("HOME") .. "/.hammerspoon/overlay_pos.json"
+
+local saved_pos = nil  -- { x, y } cargado de disco al inicio
 local drag = { active = false, ox = 0, oy = 0 }
+
+-- Carga posición guardada desde disco (nil si no existe o es inválida)
+local function load_pos()
+    local f = io.open(POS_FILE, "r")
+    if not f then return nil end
+    local raw = f:read("*a"); f:close()
+    local ok, data = pcall(hs.json.decode, raw)
+    if ok and data and data.x and data.y then return data end
+    return nil
+end
+
+-- Persiste posición en disco
+local function save_pos(x, y)
+    local f = io.open(POS_FILE, "w")
+    if not f then return end
+    f:write(hs.json.encode({ x = x, y = y }))
+    f:close()
+end
+
+-- ── Detección de dispositivo ──
+
+local IS_MACBOOK = (hs.host.localizedName() or ""):lower():find("macbook") ~= nil
 
 -- ── Constantes visuales ──
 
@@ -81,7 +105,7 @@ local function get_entries()
         table.insert(entries, { label = idle, color = color })
     end
     -- Claude: se muestra siempre que haya sesión activa (va después de breaks)
-    local cl_rows = claude.overlay_rows()
+    local cl_rows = claude.overlay_rows(IS_MACBOOK)
     if not cl_rows[1].label:find("sin sesión") then
         for _, row in ipairs(cl_rows) do
             table.insert(entries, { label = row.label, color = claude.color_for(row.pct) })
@@ -113,12 +137,14 @@ local function render(entries)
     local cw = inner_w + OUTER_PAD * 2
     local ch = inner_h + OUTER_PAD * 2
 
-    -- Posición
-    local screen = hs.screen.mainScreen():fullFrame()
+    -- Posición: prioridad → guardada en disco → esquina inferior-derecha del área visible
     local cx, cy
     if saved_pos then
         cx, cy = saved_pos.x, saved_pos.y
     else
+        local scr = hs.screen.primaryScreen()
+        if not scr then return end
+        local screen = scr:fullFrame()
         cx = screen.x + screen.w - cw - MARGIN
         cy = screen.y + screen.h - ch - MARGIN
     end
@@ -173,6 +199,7 @@ local function render(entries)
                         if canvas then
                             local f = canvas:frame()
                             saved_pos = { x = f.x, y = f.y }
+                            save_pos(f.x, f.y)
                         end
                         drag.active = false
                         if drag_tap then drag_tap:stop() end
@@ -205,6 +232,7 @@ local function update()
 end
 
 function M.start()
+    if not saved_pos then saved_pos = load_pos() end
     update()
     if not timer then timer = hs.timer.doEvery(1, update) end
 end
