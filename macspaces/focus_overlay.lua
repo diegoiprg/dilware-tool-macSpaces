@@ -128,6 +128,8 @@ local function render(entries)
     local total_h = ch + shadow_extra * 2
 
     -- Posición: prioridad → guardada en memoria → esquina inferior-derecha
+    -- La sombra se extiende más allá del contenido visible; compensar para que
+    -- el borde visible del panel quede a MARGIN del borde de pantalla
     local cx, cy
     if saved_pos then
         cx, cy = saved_pos.x, saved_pos.y
@@ -135,8 +137,8 @@ local function render(entries)
         local scr = hs.screen.primaryScreen()
         if not scr then return end
         local screen = scr:fullFrame()
-        cx = screen.x + screen.w - total_w - MARGIN
-        cy = screen.y + screen.h - total_h - MARGIN
+        cx = screen.x + screen.w - total_w - MARGIN + shadow_extra
+        cy = screen.y + screen.h - total_h - MARGIN + shadow_extra
     end
 
     canvas = hs.canvas.new({ x = cx, y = cy, w = total_w, h = total_h })
