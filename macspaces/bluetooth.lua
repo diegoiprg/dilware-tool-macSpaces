@@ -1,5 +1,6 @@
 -- macspaces/bluetooth.lua
 -- Lista dispositivos Bluetooth conectados con información de batería.
+-- Usa helper Swift nativo (bt_devices) para obtener nombres BT reales.
 
 local M = {}
 
@@ -7,45 +8,47 @@ local utils = require("macspaces.utils")
 
 local cache = { devices = nil, last_fetch = 0, ttl = 120 }
 
-local function parse_ioreg()
-    local output = hs.execute(
-        "ioreg -r -k BatteryPercent -l 2>/dev/null | grep -E '\"(Product|BatteryPercent|BatteryLevel|DeviceAddress)\"'; " ..
-        "ioreg -r -k BatteryLevel -l 2>/dev/null | grep -E '\"(Product|BatteryPercent|BatteryLevel|DeviceAddress)\"'; " ..
-        "ioreg -r -k DeviceAddress -l 2>/dev/null | grep -E '\"(Product|BatteryPercent|BatteryLevel|DeviceAddress)\"'"
-    )
-    local devices, current = {}, {}
-    for line in output:gmatch("[^\n]+") do
-        local key, val = line:match('"(%w+)"%s*=%s*"([^"]*)"')
-        if not key then key, val = line:match('"(%w+)"%s*=%s*(%d+)') end
-        if key and val then
-            if key == "Product" then
-                if current.name then table.insert(devices, current) end
-                current = { name = val }
-            elseif key == "BatteryPercent" then current.battery = tonumber(val)
-            elseif key == "BatteryLevel" and not current.battery then current.battery = tonumber(val)
-            elseif key == "DeviceAddress" then current.address = val
-            end
-        end
-    end
-    if current.name then table.insert(devices, current) end
+-- ── Helper Swift ──
 
-    local seen, unique = {}, {}
-    for _, dev in ipairs(devices) do
-        if not seen[dev.name] then
-            seen[dev.name] = true; table.insert(unique, dev)
-        elseif dev.battery then
-            for _, u in ipairs(unique) do
-                if u.name == dev.name and not u.battery then u.battery = dev.battery; break end
-            end
+local HS_DIR  = (os.getenv("HOME") or "") .. "/.hammerspoon"
+local BIN     = HS_DIR .. "/bt_devices"
+local SRC     = HS_DIR .. "/bt_devices.swift"
+
+local function ensure_binary()
+    local f = io.open(BIN, "r")
+    if f then f:close(); return true end
+    local fs = io.open(SRC, "r")
+    if not fs then utils.log("[WARN] bluetooth: bt_devices.swift no encontrado"); return false end
+    fs:close()
+    local cmd = string.format("swiftc %s -o %s 2>&1", SRC, BIN)
+    local output, ok = hs.execute(cmd)
+    if not ok then utils.log("[ERROR] bluetooth: compilación falló — " .. (output or "")); return false end
+    return true
+end
+
+local function parse_helper()
+    if not ensure_binary() then return {} end
+    local output, ok = hs.execute(BIN .. " 2>/dev/null")
+    if not ok or not output or output == "" then return {} end
+
+    local devices = {}
+    for line in output:gmatch("[^\n]+") do
+        local name, addr, bat = line:match("^(.-)|(.-)|(-?%d+)$")
+        if name then
+            local battery = tonumber(bat)
+            if battery and battery < 0 then battery = nil end
+            table.insert(devices, { name = name, address = addr, battery = battery })
         end
     end
-    return unique
+    return devices
 end
+
+-- ── UI ──
 
 local function device_icon(name)
     local l = name:lower()
     if l:match("airpod") or l:match("headphone") or l:match("buds") then return "🎧"
-    elseif l:match("mouse") or l:match("mx master") or l:match("mx anywhere") then return "🖱"
+    elseif l:match("mouse") or l:match("mx") then return "🖱"
     elseif l:match("keyboard") or l:match("teclado") or l:match("keys") then return "⌨️"
     elseif l:match("trackpad") then return "⬜"
     elseif l:match("speaker") or l:match("soundlink") then return "🔊"
@@ -62,7 +65,7 @@ end
 function M.devices()
     local now = os.time()
     if cache.devices and (now - cache.last_fetch) < cache.ttl then return cache.devices end
-    local ok, result = pcall(parse_ioreg)
+    local ok, result = pcall(parse_helper)
     cache.devices = ok and result or {}
     cache.last_fetch = now
     if not ok then utils.log("[ERROR] bluetooth: " .. tostring(result)) end
