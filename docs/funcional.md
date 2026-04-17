@@ -1,4 +1,4 @@
-# Especificación Funcional — macSpaces v2.11.2
+# Especificación Funcional — macSpaces v2.11.5
 
 ## Tabla de contenido
 
@@ -276,9 +276,11 @@ Al desactivar:
 - Barra de progreso con caracteres `▰▱` (8 o 10 caracteres según contexto)
 - Porcentaje de uso y tiempo hasta el reset
 - Color semáforo: verde (<60%), amarillo (60–84%), rojo (≥85%)
+- Indicador de frescura del dato: 🟢 (dato <10 min) / 🔴 con tiempo transcurrido (dato >10 min sin actualizar)
 - En MacBook: modo compacto sin barra de progreso para ahorrar espacio
 - Caché de 60 segundos; ignora caches con más de 6 horas de antigüedad
 - El submenú incluye botón de actualización e ítem para abrir `claude.ai/settings/usage`
+- Si el dato está desactualizado, el submenú muestra advertencia con tiempo transcurrido
 
 ---
 

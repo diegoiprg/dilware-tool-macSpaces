@@ -2,6 +2,15 @@
 
 Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
+## [2.11.5] - 2026-04-17
+
+### Agregado
+- `claude.lua`: indicador de frescura del dato con semáforo 🟢/🔴 — muestra 🟢 cuando el dato tiene <10 minutos y 🔴 con tiempo transcurrido cuando es más antiguo (ej: `🔴48m`). Visible en overlay y submenú. Resuelve el caso donde el cache se congela al agotar la cuota (Claude Code deja de enviar status lines)
+
+### Cambiado
+- `claude.lua`: `fetch()` ahora retorna `updated_at` en el objeto de datos para que los consumidores puedan evaluar frescura
+- `claude.lua`: nueva constante `STALE_THRESHOLD = 10 * 60` para umbral de dato desactualizado
+
 ## [2.11.4] - 2026-04-17
 
 ### Corregido

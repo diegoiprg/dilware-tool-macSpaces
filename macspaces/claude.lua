@@ -8,7 +8,8 @@ local utils = require("macspaces.utils")
 
 -- ── Cache ──────────────────────────────────────────────────────────────────
 
-local CACHE_MAX_AGE = 6 * 3600  -- descartar si el archivo tiene más de 6h sin actualizar
+local CACHE_MAX_AGE    = 6 * 3600   -- descartar si el archivo tiene más de 6h sin actualizar
+local STALE_THRESHOLD  = 10 * 60    -- dato >10min sin actualizar → marcar como stale
 
 local cache = {
     data       = nil,
@@ -57,8 +58,21 @@ local function read_from_claude_code()
             pct   = adjusted_pct(data.seven_day and data.seven_day.pct, data.seven_day and data.seven_day.reset),
             reset = (data.seven_day and data.seven_day.reset) or 0,
         },
+        updated_at = data.updated_at or 0,
         source = "code",
     }
+end
+
+-- Indicador de frescura del dato: 🟢 fresco, 🔴 stale con tiempo
+local function freshness_indicator(updated_at)
+    if not updated_at or updated_at == 0 then return " 🔴" end
+    local age = os.time() - updated_at
+    if age < STALE_THRESHOLD then return " 🟢" end
+    local m = math.floor(age / 60)
+    if m >= 60 then
+        return string.format(" 🔴%dh%dm", math.floor(m / 60), m % 60)
+    end
+    return string.format(" 🔴%dm", m)
 end
 
 function M.fetch()
@@ -116,12 +130,13 @@ function M.overlay_rows(minimal)
 
     local fh = d.five_hour
     local sd = d.seven_day or { pct = 0, reset = 0 }
+    local stale = freshness_indicator(d.updated_at)
 
     local function row_label(name, pct, reset_epoch)
         if minimal then
-            return string.format("✦ Claude %s  %d%%  ↺%s", name, pct, fmt_reset(reset_epoch))
+            return string.format("✦ Claude %s  %d%%  ↺%s%s", name, pct, fmt_reset(reset_epoch), stale)
         end
-        return string.format("✦ Claude %s  %s %d%%  ↺%s", name, bar(pct, 8), pct, fmt_reset(reset_epoch))
+        return string.format("✦ Claude %s  %s %d%%  ↺%s%s", name, bar(pct, 8), pct, fmt_reset(reset_epoch), stale)
     end
 
     local rows = {{ label = row_label("5h", fh.pct, fh.reset), pct = fh.pct }}
@@ -150,6 +165,7 @@ function M.build_submenu()
 
     local fh = d.five_hour
     local sd = d.seven_day or { pct = 0, reset = 0 }
+    local stale = freshness_indicator(d.updated_at)
 
     table.insert(items, utils.disabled_item(string.format("5h   %s %d%%", bar(fh.pct, 10), fh.pct)))
     table.insert(items, utils.disabled_item("     Reset en " .. fmt_reset(fh.reset)))
@@ -158,6 +174,11 @@ function M.build_submenu()
         table.insert(items, { title = "-" })
         table.insert(items, utils.disabled_item(string.format("7d   %s %d%%", bar(sd.pct, 10), sd.pct)))
         table.insert(items, utils.disabled_item("     Reset en " .. fmt_reset(sd.reset)))
+    end
+
+    if stale:find("🔴") then
+        table.insert(items, { title = "-" })
+        table.insert(items, utils.disabled_item("🔴 Dato desactualizado" .. stale:gsub(" 🔴", " — hace ")))
     end
 
     table.insert(items, { title = "-" })

@@ -1,4 +1,4 @@
-# Referencia Técnica — macSpaces v2.11.2
+# Referencia Técnica — macSpaces v2.11.5
 
 ## Tabla de contenido
 
@@ -271,14 +271,15 @@ Usa `hs.focus.setFocusModeEnabled()` si disponible (Hammerspoon 0.9.97+). Fallba
 
 | Función | Descripción |
 |---|---|
-| `M.fetch()` | Lee `~/.claude/usage_cache.json` con caché de 60s; retorna `{ five_hour, seven_day, source }` |
+| `M.fetch()` | Lee `~/.claude/usage_cache.json` con caché de 60s; retorna `{ five_hour, seven_day, updated_at, source }` |
 | `M.invalidate()` | Fuerza recarga en el próximo acceso |
+| `M.has_session()` | `true` si hay sesión activa con datos de rate limit |
 | `M.overlay_rows(minimal)` | Retorna tabla de `{ label, pct }` para el overlay; `minimal=true` omite barra de progreso |
 | `M.overlay_label()` | Compatibilidad: primera fila como string |
 | `M.color_for(pct)` | Color semáforo: verde (<60%), amarillo (60–84%), rojo (≥85%) |
 | `M.build_submenu()` | Ítems del submenú con uso de ventanas 5h y 7d |
 
-Fuente de datos: `~/.claude/usage_cache.json` generado por `statusline.sh`. Ignora caches con más de 6 horas de antigüedad (`updated_at`). Barra de progreso usa caracteres `▰▱`. La función `overlay_rows()` retorna 1 o 2 filas según disponibilidad de datos de 7 días. Si el epoch de reset de una ventana ya pasó, `adjusted_pct()` devuelve 0% automáticamente (aplicado al leer el JSON y al servir desde cache).
+Fuente de datos: `~/.claude/usage_cache.json` generado por `statusline.sh`. Ignora caches con más de 6 horas de antigüedad (`updated_at`). Barra de progreso usa caracteres `▰▱`. La función `overlay_rows()` retorna 1 o 2 filas según disponibilidad de datos de 7 días. Si el epoch de reset de una ventana ya pasó, `adjusted_pct()` devuelve 0% automáticamente (aplicado al leer el JSON y al servir desde cache). Indicador de frescura `freshness_indicator()`: 🟢 si el dato tiene <10 min (`STALE_THRESHOLD`), 🔴 con tiempo transcurrido si es más antiguo.
 
 ---
 
