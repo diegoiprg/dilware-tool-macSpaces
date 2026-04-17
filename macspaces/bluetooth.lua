@@ -28,8 +28,11 @@ end
 
 local function parse_helper()
     if not ensure_binary() then return {} end
-    local output = hs.execute(BIN .. " 2>/dev/null", true)
-    if not output or type(output) ~= "string" or output == "" then return {} end
+    local handle = io.popen(BIN .. " 2>/dev/null")
+    if not handle then return {} end
+    local output = handle:read("*a")
+    handle:close()
+    if not output or output == "" then return {} end
 
     local devices = {}
     for line in output:gmatch("[^\n]+") do
