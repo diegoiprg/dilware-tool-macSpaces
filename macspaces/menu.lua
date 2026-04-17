@@ -44,6 +44,7 @@ local function build_items()
     local items = {}
 
     -- ══ Perfiles ══
+    table.insert(items, utils.disabled_item("PERFILES"))
     for _, key in ipairs(cfg.profile_order) do
         local profile = cfg.profiles[key]
         if profile then
@@ -52,7 +53,7 @@ local function build_items()
             if active then
                 local st = profiles.get_state(key)
                 if st and st.started_at then
-                    title = title .. " — " .. utils.format_time(os.time() - st.started_at)
+                    title = title .. "  ·  " .. utils.format_time(os.time() - st.started_at)
                 end
             end
             title = title .. hotkey_label(key)
@@ -78,58 +79,44 @@ local function build_items()
             })
         end
     end
+    table.insert(items, { title = "📊  Historial", menu = history.build_submenu() })
 
     -- ══ Entorno ══
     table.insert(items, { title = "-" })
-    local entorno = {}
-    table.insert(entorno, utils.disabled_item("🌐  Navegador"))
-    for _, i in ipairs(browsers.build_submenu(refresh)) do table.insert(entorno, i) end
-    table.insert(entorno, { title = "-" })
-    table.insert(entorno, utils.disabled_item("🔊  Audio"))
-    for _, i in ipairs(audio.build_submenu()) do table.insert(entorno, i) end
-    table.insert(entorno, { title = "-" })
-    table.insert(entorno, utils.disabled_item("🎵  Música"))
-    for _, i in ipairs(music.build_submenu()) do table.insert(entorno, i) end
-    table.insert(items, { title = "🎛  Entorno", menu = entorno })
+    table.insert(items, utils.disabled_item("ENTORNO"))
+    table.insert(items, { title = "🌐  Navegador", menu = browsers.build_submenu(refresh) })
+    table.insert(items, { title = "🔊  Audio", menu = audio.build_submenu() })
+    table.insert(items, { title = "🎵  Música", menu = music.build_submenu() })
 
     -- ══ Dispositivos ══
-    local disp = {}
+    table.insert(items, { title = "-" })
+    table.insert(items, utils.disabled_item("DISPOSITIVOS"))
     if battery.has_battery() then
-        table.insert(disp, utils.disabled_item("🔋  Batería"))
-        for _, i in ipairs(battery.build_submenu()) do table.insert(disp, i) end
-        table.insert(disp, { title = "-" })
+        table.insert(items, { title = "🔋  Batería", menu = battery.build_submenu() })
     end
     local bt_count = #bluetooth.devices()
-    table.insert(disp, utils.disabled_item("📡  Bluetooth" .. (bt_count > 0 and (" (" .. bt_count .. ")") or "")))
-    for _, i in ipairs(bluetooth.build_submenu()) do table.insert(disp, i) end
-    table.insert(items, { title = "📱  Dispositivos", menu = disp })
+    local bt_label = "📡  Bluetooth"
+    if bt_count > 0 then bt_label = bt_label .. "  (" .. bt_count .. ")" end
+    table.insert(items, { title = bt_label, menu = bluetooth.build_submenu() })
 
     -- ══ Red ══
     local red = {}
-    table.insert(red, utils.disabled_item("📶  Red"))
     for _, i in ipairs(network.build_submenu(refresh)) do table.insert(red, i) end
     if vpn.is_active() then
         table.insert(red, { title = "-" })
-        table.insert(red, utils.disabled_item("🔒  VPN"))
+        table.insert(red, utils.disabled_item("🔒  VPN activa"))
         for _, i in ipairs(vpn.build_submenu(refresh)) do table.insert(red, i) end
     end
-    table.insert(items, { title = "🌐  Red", menu = red })
+    table.insert(items, { title = "📶  Red", menu = red })
 
-    -- ══ Portapapeles ══
+    -- ══ Herramientas ══
+    table.insert(items, { title = "-" })
+    table.insert(items, utils.disabled_item("HERRAMIENTAS"))
     table.insert(items, { title = "📋  Portapapeles", menu = clipboard.build_submenu(refresh) })
-
-    -- ══ Lanzador ══
     local launcher_apps = (cfg.launcher and cfg.launcher.apps) or {}
     if #launcher_apps > 0 then
         table.insert(items, { title = "🚀  Lanzador", menu = launcher.build_submenu() })
     end
-
-    -- ══ Historial ══
-    table.insert(items, { title = "-" })
-    table.insert(items, { title = "📊  Historial", menu = history.build_submenu() })
-
-    -- ══ Claude ══
-    table.insert(items, { title = "-" })
     table.insert(items, { title = "✦  Claude", menu = claude.build_submenu() })
 
     -- ══ Sistema ══
@@ -139,8 +126,6 @@ local function build_items()
         fn    = function() hs.execute("open -a Console " .. (os.getenv("HOME") or "/tmp") .. "/.hammerspoon/debug.log") end,
     })
     table.insert(items, { title = "🔄  Recargar", fn = hs.reload })
-
-    -- ══ Versión ══
     table.insert(items, { title = "-" })
     table.insert(items, utils.disabled_item("macSpaces v" .. cfg.VERSION))
 

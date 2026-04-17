@@ -47,21 +47,27 @@ local function build_items()
     local items = {}
 
     -- ══ Pomodoro ══
-    local pom_label = pomodoro.is_active()
-        and ("🍅  Pomodoro — " .. (pomodoro.time_label() or ""))
-        or  "🍅  Pomodoro"
-    table.insert(items, utils.disabled_item(pom_label))
-    for _, i in ipairs(pomodoro.build_submenu(refresh)) do table.insert(items, i) end
+    local pom_title = "🍅  Pomodoro"
+    if pomodoro.is_active() then
+        pom_title = pom_title .. "  ·  " .. (pomodoro.menubar_label() or "")
+    end
+    table.insert(items, { title = pom_title, menu = pomodoro.build_submenu(refresh) })
 
     -- ══ Descanso activo ══
-    table.insert(items, { title = "-" })
-    table.insert(items, utils.disabled_item("◎  Descanso activo"))
-    for _, i in ipairs(breaks.build_submenu(refresh)) do table.insert(items, i) end
+    local brk_title = "◎  Descanso activo"
+    if breaks.is_enabled() then
+        local idle = breaks.idle_label()
+        if idle then
+            local time_part = idle:match("·%s*(.+)$")
+            if time_part then brk_title = brk_title .. "  ·  " .. time_part end
+        end
+    end
+    table.insert(items, { title = brk_title, menu = breaks.build_submenu(refresh) })
 
     -- ══ Presentación ══
-    table.insert(items, { title = "-" })
-    table.insert(items, utils.disabled_item("🎬  Presentación"))
-    for _, i in ipairs(presentation.build_submenu(refresh)) do table.insert(items, i) end
+    local pres_title = "🎬  Presentación"
+    if presentation.is_active() then pres_title = pres_title .. "  ·  activo" end
+    table.insert(items, { title = pres_title, menu = presentation.build_submenu(refresh) })
 
     return items
 end
