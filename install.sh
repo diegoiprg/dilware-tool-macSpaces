@@ -49,6 +49,7 @@ S_XCODE="" ; S_BREW="" ; S_HAMMER="" ; S_FILES="" ; S_SWIFT="" ; S_LAUNCH=""
 FILES=(
   init.lua
   macspaces/config.lua
+  macspaces/version.lua
   macspaces/utils.lua
   macspaces/profiles.lua
   macspaces/browsers.lua

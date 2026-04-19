@@ -3,7 +3,7 @@
 
 local M = {}
 
-M.VERSION = "2.11.8"
+M.VERSION = require("macspaces.version")
 
 M.profile_order = { "personal", "work" }
 
