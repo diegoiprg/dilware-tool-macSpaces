@@ -1,4 +1,4 @@
-# Especificación Funcional — macSpaces v2.11.8
+# Especificación Funcional — macSpaces v2.11.9
 
 ## Tabla de contenido
 

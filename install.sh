@@ -74,6 +74,18 @@ FILES=(
   macspaces/menu.lua
 )
 
+# ── Migración de config.lua del usuario ──────────────────────
+
+migrate_config_version() {
+  local cfg="${HS_DIR}/macspaces/config.lua"
+  [[ -f "$cfg" ]] || return 0
+  if grep -q 'M\.VERSION *= *"' "$cfg" 2>/dev/null; then
+    $DRY && { info "se migraría VERSION en config.lua"; return 0; }
+    sed -i '' 's/M\.VERSION *= *"[^"]*"/M.VERSION = require("macspaces.version")/' "$cfg"
+    ok "config.lua: VERSION migrada a require(\"macspaces.version\")"
+  fi
+}
+
 # ── Funciones de instalación de archivos ─────────────────────
 
 LINK_COUNT=0
@@ -113,6 +125,7 @@ install_local() {
       mv "${HS_DIR}/macspaces/config.lua.user" "${HS_DIR}/macspaces/config.lua"
     fi
     ok "config.lua personalizado preservado"
+    migrate_config_version
   fi
 
   ok "${LINK_COUNT} symlinks → ~/.hammerspoon/"
@@ -143,6 +156,7 @@ install_remote() {
       mv "${HS_DIR}/macspaces/config.lua.user" "${HS_DIR}/macspaces/config.lua"
     fi
     ok "config.lua personalizado preservado"
+    migrate_config_version
   fi
 
   ok "${count} archivos descargados → ~/.hammerspoon/"

@@ -1,4 +1,4 @@
-# Referencia Técnica — macSpaces v2.11.8
+# Referencia Técnica — macSpaces v2.11.9
 
 ## Tabla de contenido
 

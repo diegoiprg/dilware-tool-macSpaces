@@ -2,6 +2,11 @@
 
 Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
+## [2.11.9] - 2026-04-19
+
+### Corregido
+- `install.sh`: al preservar `config.lua` del usuario, ahora migra automáticamente `M.VERSION = "..."` hardcodeado a `require("macspaces.version")` — sin esto, usuarios que actualizan desde ≤2.11.6 quedaban con la versión vieja visible
+
 ## [2.11.8] - 2026-04-19
 
 ### Mejorado

@@ -1,4 +1,4 @@
-# Arquitectura — macSpaces v2.11.8
+# Arquitectura — macSpaces v2.11.9
 
 ## Tabla de contenido
 
