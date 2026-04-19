@@ -430,3 +430,4 @@ Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 - Menú en barra superior, notificaciones y log
 - Script de instalación automática
 - Licencia GPLv3
+v2.12.2 - fix(gemini): corregir bug en generación de caché de cuota
