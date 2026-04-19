@@ -69,6 +69,7 @@ FILES=(
   macspaces/hotkeys.lua
   macspaces/dnd.lua
   macspaces/claude.lua
+  macspaces/gemini.lua
   macspaces/focus_overlay.lua
   macspaces/focus_menu.lua
   macspaces/menu.lua

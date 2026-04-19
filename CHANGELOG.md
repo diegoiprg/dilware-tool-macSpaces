@@ -2,6 +2,11 @@
 
 Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
+## [2.12.1] - 2026-04-19
+
+### Corregido
+- `install.sh`: agregar `gemini.lua` a la lista de archivos — sin esto, la instalación por symlink o descarga no incluía el módulo y Hammerspoon fallaba al cargar
+
 ## [2.12.0] - 2026-04-19
 
 ### Agregado
