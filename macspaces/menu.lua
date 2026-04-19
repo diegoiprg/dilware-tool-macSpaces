@@ -18,6 +18,7 @@ local launcher     = require("macspaces.launcher")
 local music        = require("macspaces.music")
 local utils        = require("macspaces.utils")
 local claude       = require("macspaces.claude")
+local gemini       = require("macspaces.gemini")
 
 local menubar = hs.menubar.new()
 local rebuild_timer = nil
@@ -118,6 +119,7 @@ local function build_items()
         table.insert(items, { title = "🚀  Lanzador", menu = launcher.build_submenu() })
     end
     table.insert(items, { title = "✦  Claude", menu = claude.build_submenu() })
+    table.insert(items, { title = "✦  Gemini", menu = gemini.build_submenu() })
 
     -- ══ Sistema ══
     table.insert(items, { title = "-" })

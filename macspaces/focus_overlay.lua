@@ -8,6 +8,7 @@ local pomodoro     = require("macspaces.pomodoro")
 local breaks       = require("macspaces.breaks")
 local presentation = require("macspaces.presentation")
 local claude       = require("macspaces.claude")
+local gemini       = require("macspaces.gemini")
 
 local canvas   = nil
 local timer    = nil
@@ -94,6 +95,11 @@ local function get_entries()
     if claude.has_session() then
         for _, row in ipairs(claude.overlay_rows(IS_MACBOOK)) do
             table.insert(entries, { label = row.label, color = claude.color_for(row.pct) })
+        end
+    end
+    if gemini.has_session() then
+        for _, row in ipairs(gemini.overlay_rows(IS_MACBOOK)) do
+            table.insert(entries, { label = row.label, color = gemini.color_for(row.pct) })
         end
     end
     return entries

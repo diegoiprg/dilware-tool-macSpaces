@@ -2,6 +2,14 @@
 
 Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
+## [2.12.0] - 2026-04-19
+
+### Agregado
+- Módulo `macspaces/gemini.lua` — monitoreo de cuota de Gemini CLI en overlay y menú de barra
+- Script `gemini-usage.sh` — consulta endpoint OAuth de cuota de Gemini y escribe `~/.gemini/usage_cache.json`
+- Integración en `focus_overlay.lua`: filas de Gemini (modelo, barra de progreso, %, frescura, reset) cuando hay cache válido
+- Ítem "✦  Gemini" en `menu.lua` con submenu por modelo y acceso a AI Studio
+
 ## [2.11.9] - 2026-04-19
 
 ### Corregido
