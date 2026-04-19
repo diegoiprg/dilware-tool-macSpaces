@@ -1,4 +1,4 @@
-# Referencia de Módulos — macSpaces v2.11.0
+# Referencia de Módulos — macSpaces v2.11.7
 
 Referencia detallada de cada módulo Lua: responsabilidad, estado interno, API pública y dependencias.
 

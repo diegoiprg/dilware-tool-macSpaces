@@ -1,6 +1,6 @@
 # Gestor de entorno macOS — macSpaces
 
-![Versión](https://img.shields.io/badge/versión-v2.11.6-6366f1?style=flat-square)
+![Versión](https://img.shields.io/badge/versión-v2.11.7-6366f1?style=flat-square)
 ![Licencia](https://img.shields.io/badge/licencia-GPLv3-a855f7?style=flat-square)
 ![Plataforma](https://img.shields.io/badge/plataforma-macOS-222?style=flat-square&logo=apple&logoColor=white)
 
@@ -108,33 +108,40 @@ El proyecto está compuesto por los siguientes módulos Lua, cada uno con respon
 ## Requisitos
 
 - macOS con Mission Control habilitado
-- [Hammerspoon](https://www.hammerspoon.org) instalado
-- Permisos de Accesibilidad y Automatización para Hammerspoon
 
 ## Instalación
 
-### Método manual (recomendado)
+### Automática (recomendada)
 
-```bash
-# 1. Clonar el repositorio
-git clone https://github.com/diegoiprg/dilware-tool-macGestorEntorno.git ~/dilware-tool-macGestorEntorno
+Un solo comando que instala todo: Xcode CLI Tools, Homebrew, Hammerspoon, archivos de configuración, helper Swift compilado, y lanza Hammerspoon listo para usar.
 
-# 2. Copiar archivos a Hammerspoon
-cp ~/dilware-tool-macGestorEntorno/init.lua ~/.hammerspoon/init.lua
-cp -r ~/dilware-tool-macGestorEntorno/macspaces ~/.hammerspoon/macspaces
-
-# 3. Abrir Hammerspoon y presionar ⌘R para recargar
-```
-
-### Script de instalación
-
-> Ejecutar scripts remotos con `curl | bash` implica confiar en el contenido del repositorio. Revisa el código antes de ejecutar.
+> Ejecutar scripts remotos con `curl | bash` implica confiar en el contenido del repositorio. [Revisa el código](install.sh) antes de ejecutar.
 
 ```bash
 curl -sL https://raw.githubusercontent.com/diegoiprg/dilware-tool-macGestorEntorno/main/install.sh | bash
 ```
 
-Después abre Hammerspoon y presiona ⌘R para recargar. El ícono ⌘ aparecerá en tu barra de menú.
+El instalador preserva tu `config.lua` si ya tenías una configuración personalizada.
+
+Después de la instalación, macOS te pedirá permisos para Hammerspoon:
+- Ajustes del Sistema → Privacidad y Seguridad → Accesibilidad → Hammerspoon ✓
+- Ajustes del Sistema → Privacidad y Seguridad → Automatización → Hammerspoon ✓
+
+### Manual
+
+```bash
+# 1. Instalar Hammerspoon (si no lo tienes)
+brew install --cask hammerspoon
+
+# 2. Clonar el repositorio
+git clone https://github.com/diegoiprg/dilware-tool-macGestorEntorno.git ~/dilware-tool-macGestorEntorno
+
+# 3. Copiar archivos a Hammerspoon
+cp ~/dilware-tool-macGestorEntorno/init.lua ~/.hammerspoon/init.lua
+cp -r ~/dilware-tool-macGestorEntorno/macspaces ~/.hammerspoon/macspaces
+
+# 4. Abrir Hammerspoon y presionar ⌘R para recargar
+```
 
 ## Documentación
 

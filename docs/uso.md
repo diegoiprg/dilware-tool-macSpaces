@@ -1,4 +1,4 @@
-# Guía de Uso — macSpaces v2.11.0
+# Guía de Uso — macSpaces v2.11.7
 
 ## Tabla de contenido
 
@@ -23,33 +23,44 @@
 ## Requisitos
 
 - macOS con Mission Control habilitado
-- [Hammerspoon](https://www.hammerspoon.org) instalado y abierto al menos una vez
-- Permisos de Accesibilidad y Automatización para Hammerspoon
-- Xcode Command Line Tools (para compilar el helper Swift de cambio de navegador)
+
+El instalador automático se encarga de instalar Xcode CLI Tools, Homebrew y Hammerspoon si no están presentes.
 
 ---
 
 ## Instalación
 
-### Método manual (recomendado)
+### Automática (recomendada)
 
-```bash
-git clone https://github.com/diegoiprg/dilware-tool-macGestorEntorno.git ~/dilware-tool-macGestorEntorno
-cp ~/dilware-tool-macGestorEntorno/init.lua ~/.hammerspoon/init.lua
-cp -r ~/dilware-tool-macGestorEntorno/macspaces ~/.hammerspoon/macspaces
-```
+Un solo comando que instala todo: Xcode CLI Tools, Homebrew, Hammerspoon, archivos de configuración, helper Swift compilado, y lanza Hammerspoon listo para usar.
 
-Abre Hammerspoon y presiona `⌘R` para recargar. El ícono `⌘` aparecerá en tu barra de menú.
-
-### Script de instalación
-
-> Revisa el código de `install.sh` antes de ejecutarlo. Los scripts remotos deben revisarse antes de ejecutarse con permisos de usuario.
+> Ejecutar scripts remotos con `curl | bash` implica confiar en el contenido del repositorio. [Revisa el código](https://github.com/diegoiprg/dilware-tool-macGestorEntorno/blob/main/install.sh) antes de ejecutar.
 
 ```bash
 curl -sL https://raw.githubusercontent.com/diegoiprg/dilware-tool-macGestorEntorno/main/install.sh | bash
 ```
 
-El script hace respaldo automático de `init.lua` y `macspaces/` existentes antes de copiar.
+El instalador preserva tu `config.lua` si ya tenías una configuración personalizada.
+
+Después de la instalación, macOS te pedirá permisos para Hammerspoon:
+- Ajustes del Sistema → Privacidad y Seguridad → Accesibilidad → Hammerspoon ✓
+- Ajustes del Sistema → Privacidad y Seguridad → Automatización → Hammerspoon ✓
+
+### Manual
+
+```bash
+# 1. Instalar Hammerspoon (si no lo tienes)
+brew install --cask hammerspoon
+
+# 2. Clonar el repositorio
+git clone https://github.com/diegoiprg/dilware-tool-macGestorEntorno.git ~/dilware-tool-macGestorEntorno
+
+# 3. Copiar archivos a Hammerspoon
+cp ~/dilware-tool-macGestorEntorno/init.lua ~/.hammerspoon/init.lua
+cp -r ~/dilware-tool-macGestorEntorno/macspaces ~/.hammerspoon/macspaces
+
+# 4. Abrir Hammerspoon y presionar ⌘R para recargar
+```
 
 ---
 
@@ -90,7 +101,7 @@ Un banner unificado en la esquina inferior derecha muestra filas coloreadas por 
 | Púrpura | Presentación activa | Indicador de modo activo |
 | Verde/Amarillo/Rojo | Claude activo | Uso 5h y/o 7d con % y tiempo de reset |
 
-Arrastrable: haz clic y arrastra para reposicionar. La posición se persiste en disco (`~/.hammerspoon/overlay_pos.json`) y se restaura entre reinicios de Hammerspoon. Visible en todos los espacios de Mission Control. Se oculta automáticamente cuando no hay estado activo.
+Arrastrable: haz clic y arrastra para reposicionar. La posición se mantiene durante la sesión y se resetea al recargar Hammerspoon. Visible en todos los espacios de Mission Control. Se oculta automáticamente cuando no hay estado activo.
 
 En MacBook, las filas de Claude usan formato compacto (sin barra de progreso `▰▱`) para evitar solapamiento con el Dock.
 

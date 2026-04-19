@@ -1,4 +1,4 @@
-# Seguridad — macSpaces v2.11.0
+# Seguridad — macSpaces v2.11.7
 
 ## Tabla de contenido
 

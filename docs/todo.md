@@ -1,4 +1,4 @@
-# TODO — macSpaces v2.11.0
+# TODO — macSpaces v2.11.7
 
 Pendientes consolidados: seguridad, UX/HIG, rendimiento, bugs y mejoras.
 Generado: 2026-04-01. Actualizado: 2026-04-15.

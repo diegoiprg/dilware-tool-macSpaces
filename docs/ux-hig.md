@@ -1,4 +1,4 @@
-# Análisis UX/UI — Apple Human Interface Guidelines — macSpaces v2.11.0
+# Análisis UX/UI — Apple Human Interface Guidelines — macSpaces v2.11.7
 
 ## Tabla de contenido
 

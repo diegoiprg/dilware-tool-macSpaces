@@ -2,6 +2,14 @@
 
 Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
+## [2.11.7] - 2026-04-19
+
+### Mejorado
+- `install.sh`: reescrito como instalador completo — instala Xcode CLI Tools, Homebrew y Hammerspoon automáticamente si no están presentes; descarga archivos via `curl` sin requerir `git`; preserva `config.lua` del usuario; compila helper Swift; lanza o recarga Hammerspoon al finalizar
+- `README.md`: requisitos simplificados (solo macOS), instalación automática como método recomendado
+- `docs/uso.md`: sección de instalación actualizada, corregida referencia desactualizada sobre persistencia del overlay
+- Versión bumpeada a v2.11.7 en todos los documentos
+
 ## [2.11.6] - 2026-04-17
 
 ### Mejorado
