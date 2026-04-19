@@ -1,11 +1,11 @@
-# Guía de Uso — macSpaces v2.11.7
+# Guía de Uso — macSpaces v2.11.8
 
 ## Tabla de contenido
 
 - [Requisitos](#requisitos)
 - [Instalación](#instalación)
-  - [Método manual](#método-manual-recomendado)
-  - [Script de instalación](#script-de-instalación)
+  - [Automática (recomendada)](#automática-recomendada)
+  - [Manual](#manual)
 - [Dos menús en la menubar](#dos-menús-en-la-menubar)
 - [Uso básico](#uso-básico)
   - [Perfiles](#perfiles)
@@ -34,11 +34,25 @@ El instalador automático se encarga de instalar Xcode CLI Tools, Homebrew y Ham
 
 Un solo comando que instala todo: Xcode CLI Tools, Homebrew, Hammerspoon, archivos de configuración, helper Swift compilado, y lanza Hammerspoon listo para usar.
 
+El instalador detecta automáticamente cómo se ejecutó:
+
+**Desde un clon local** — crea symlinks (los cambios en el repo se reflejan al instante):
+
+```bash
+git clone https://github.com/diegoiprg/dilware-tool-macGestorEntorno.git
+cd dilware-tool-macGestorEntorno
+bash install.sh
+```
+
+**Remoto** — descarga los archivos directamente:
+
 > Ejecutar scripts remotos con `curl | bash` implica confiar en el contenido del repositorio. [Revisa el código](https://github.com/diegoiprg/dilware-tool-macGestorEntorno/blob/main/install.sh) antes de ejecutar.
 
 ```bash
 curl -sL https://raw.githubusercontent.com/diegoiprg/dilware-tool-macGestorEntorno/main/install.sh | bash
 ```
+
+Usa `--dry-run` para previsualizar sin aplicar cambios.
 
 El instalador preserva tu `config.lua` si ya tenías una configuración personalizada.
 

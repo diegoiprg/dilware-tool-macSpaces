@@ -127,7 +127,15 @@ local function build_items()
     })
     table.insert(items, { title = "🔄  Recargar", fn = hs.reload })
     table.insert(items, { title = "-" })
-    table.insert(items, utils.disabled_item("macSpaces v" .. cfg.VERSION))
+    table.insert(items, {
+        title = "Acerca de macSpaces",
+        menu  = {
+            utils.disabled_item("macSpaces v" .. cfg.VERSION),
+            { title = "-" },
+            utils.disabled_item("Diego Iparraguirre"),
+            { title = "dilware.net", fn = function() hs.urlevent.openURL("https://dilware.net") end },
+        },
+    })
 
     return items
 end

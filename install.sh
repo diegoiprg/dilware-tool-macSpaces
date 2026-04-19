@@ -1,69 +1,51 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
-# macSpaces — Instalador completo
-# Resuelve todas las dependencias y deja el sistema listo.
-# https://github.com/diegoiprg/dilware-tool-macGestorEntorno
+# macSpaces — Instalador
+# Modo dual: symlinks (repo local) o descarga (curl | bash).
+# Uso: bash install.sh [--dry-run]
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
-REPO="diegoiprg/dilware-tool-macGestorEntorno"
+GITHUB_REPO="diegoiprg/dilware-tool-macGestorEntorno"
 BRANCH="main"
-BASE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
+BASE_URL="https://raw.githubusercontent.com/${GITHUB_REPO}/${BRANCH}"
 HS_DIR="${HOME}/.hammerspoon"
+DRY=false
+MODE=""  # "local" o "remote"
 
-# ── Utilidades ───────────────────────────────────────────────
+for arg in "$@"; do
+  case $arg in
+    --dry-run) DRY=true ;;
+  esac
+done
 
-info()  { printf '→ %s\n' "$1"; }
-ok()    { printf '✓ %s\n' "$1"; }
-warn()  { printf '⚠ %s\n' "$1"; }
-fail()  { printf '✗ %s\n' "$1"; exit 1; }
+# ── Detección de modo ────────────────────────────────────────
 
-# ── 1. Xcode Command Line Tools ─────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
 
-if ! xcode-select -p &>/dev/null; then
-  info "Instalando Xcode Command Line Tools (necesario para compilar)..."
-  xcode-select --install 2>/dev/null || true
-  # Esperar a que el usuario complete la instalación del diálogo del SO
-  until xcode-select -p &>/dev/null; do
-    sleep 5
-  done
-  ok "Xcode CLI Tools instalado"
+if [[ -n "${SCRIPT_DIR:-}" ]] && [[ -d "${SCRIPT_DIR}/.git" ]] && [[ -f "${SCRIPT_DIR}/init.lua" ]]; then
+  MODE="local"
+  REPO="$SCRIPT_DIR"
 else
-  ok "Xcode CLI Tools disponible"
+  MODE="remote"
 fi
 
-# ── 2. Homebrew ──────────────────────────────────────────────
+# ── Colores y helpers ────────────────────────────────────────
 
-if ! command -v brew &>/dev/null; then
-  info "Instalando Homebrew..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  # Agregar brew al PATH de esta sesión (Apple Silicon vs Intel)
-  if [[ -f /opt/homebrew/bin/brew ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [[ -f /usr/local/bin/brew ]]; then
-    eval "$(/usr/local/bin/brew shellenv)"
-  fi
-  ok "Homebrew instalado"
-else
-  ok "Homebrew disponible"
-fi
+GREEN='\033[32m'; YELLOW='\033[33m'; RED='\033[31m'
+DIM='\033[2m'; BOLD='\033[1m'; RESET='\033[0m'
 
-# ── 3. Hammerspoon ───────────────────────────────────────────
+info() { echo -e "  ${DIM}→${RESET} $1"; }
+ok()   { echo -e "  ${GREEN}✓${RESET} $1"; }
+warn() { echo -e "  ${YELLOW}⚠${RESET} $1"; }
+fail() { echo -e "  ${RED}✗${RESET} $1"; exit 1; }
+section() { echo ""; echo -e "${BOLD}$1${RESET}"; }
 
-if ! brew list --cask hammerspoon &>/dev/null; then
-  info "Instalando Hammerspoon via Homebrew..."
-  brew install --cask hammerspoon
-  ok "Hammerspoon instalado"
-else
-  ok "Hammerspoon disponible"
-fi
+# Estado por sección para resumen final
+S_XCODE="" ; S_BREW="" ; S_HAMMER="" ; S_FILES="" ; S_SWIFT="" ; S_LAUNCH=""
 
-# Crear directorio de configuración si no existe
-mkdir -p "${HS_DIR}"
+# ── Archivos del proyecto ────────────────────────────────────
 
-# ── 4. Descargar archivos del repositorio ────────────────────
-
-# Lista de archivos a descargar (relativa a la raíz del repo)
 FILES=(
   init.lua
   macspaces/config.lua
@@ -91,73 +73,241 @@ FILES=(
   macspaces/menu.lua
 )
 
-# Respaldar configuración existente
-if [[ -f "${HS_DIR}/init.lua" ]]; then
-  cp "${HS_DIR}/init.lua" "${HS_DIR}/init.lua.bak"
-  info "Respaldo: init.lua.bak"
-fi
-if [[ -d "${HS_DIR}/macspaces" ]]; then
-  # Preservar config.lua del usuario si existe
+# ── Funciones de instalación de archivos ─────────────────────
+
+LINK_COUNT=0
+
+install_local() {
+  # Preservar config.lua del usuario si no es symlink
+  local has_user_config=false
+  if [[ -f "${HS_DIR}/macspaces/config.lua" ]] && [[ ! -L "${HS_DIR}/macspaces/config.lua" ]]; then
+    has_user_config=true
+    $DRY || cp "${HS_DIR}/macspaces/config.lua" "${HS_DIR}/macspaces/config.lua.user"
+  fi
+
+  mkdir -p "${HS_DIR}/macspaces"
+
+  for file in "${FILES[@]}"; do
+    local dst="${HS_DIR}/${file}"
+    local src="${REPO}/${file}"
+    if [[ ! -e "$src" ]]; then
+      warn "No existe: $file"
+      continue
+    fi
+    if $DRY; then
+      LINK_COUNT=$((LINK_COUNT + 1))
+      continue
+    fi
+    mkdir -p "$(dirname "$dst")"
+    # Si existe y no es symlink, respaldar
+    [[ -e "$dst" ]] && [[ ! -L "$dst" ]] && mv "$dst" "${dst}.bak"
+    ln -sf "$src" "$dst"
+    LINK_COUNT=$((LINK_COUNT + 1))
+  done
+
+  # Restaurar config del usuario
+  if $has_user_config; then
+    if ! $DRY; then
+      rm -f "${HS_DIR}/macspaces/config.lua"
+      mv "${HS_DIR}/macspaces/config.lua.user" "${HS_DIR}/macspaces/config.lua"
+    fi
+    ok "config.lua personalizado preservado"
+  fi
+
+  ok "${LINK_COUNT} symlinks → ~/.hammerspoon/"
+  S_FILES="ok:${LINK_COUNT} symlinks"
+}
+
+install_remote() {
+  # Preservar config.lua del usuario
   if [[ -f "${HS_DIR}/macspaces/config.lua" ]]; then
     cp "${HS_DIR}/macspaces/config.lua" "${HS_DIR}/macspaces/config.lua.user"
-    info "Respaldo de tu config: config.lua.user"
+  fi
+
+  mkdir -p "${HS_DIR}/macspaces"
+
+  local count=0
+  for file in "${FILES[@]}"; do
+    if $DRY; then
+      count=$((count + 1))
+      continue
+    fi
+    curl -fsSL "${BASE_URL}/${file}" -o "${HS_DIR}/${file}"
+    count=$((count + 1))
+  done
+
+  # Restaurar config del usuario
+  if [[ -f "${HS_DIR}/macspaces/config.lua.user" ]]; then
+    if ! $DRY; then
+      mv "${HS_DIR}/macspaces/config.lua.user" "${HS_DIR}/macspaces/config.lua"
+    fi
+    ok "config.lua personalizado preservado"
+  fi
+
+  ok "${count} archivos descargados → ~/.hammerspoon/"
+  S_FILES="ok:${count} archivos descargados"
+}
+
+# ── Banner ───────────────────────────────────────────────────
+
+echo ""
+echo -e "${BOLD}macSpaces${RESET} — instalador"
+if [[ "$MODE" == "local" ]]; then
+  echo -e "  ${DIM}modo local — symlinks desde ${REPO}${RESET}"
+else
+  echo -e "  ${DIM}modo remoto — descarga desde GitHub${RESET}"
+fi
+$DRY && echo -e "  ${YELLOW}dry-run — no se aplica ningún cambio${RESET}"
+
+# ── 1. Xcode CLI Tools ──────────────────────────────────────
+
+section "Xcode CLI Tools"
+
+if xcode-select -p &>/dev/null; then
+  ok "disponible"
+  S_XCODE="ok:disponible"
+else
+  if $DRY; then
+    info "se instalaría"
+    S_XCODE="ok:dry-run"
+  else
+    info "instalando (aparecerá un diálogo del sistema)..."
+    xcode-select --install 2>/dev/null || true
+    until xcode-select -p &>/dev/null; do sleep 5; done
+    ok "instalado"
+    S_XCODE="ok:instalado"
   fi
 fi
 
-mkdir -p "${HS_DIR}/macspaces"
+# ── 2. Homebrew ──────────────────────────────────────────────
 
-info "Descargando archivos..."
-for file in "${FILES[@]}"; do
-  curl -fsSL "${BASE_URL}/${file}" -o "${HS_DIR}/${file}"
-done
-ok "Archivos descargados en ~/.hammerspoon/"
+section "Homebrew"
 
-# Restaurar config del usuario si tenía una personalizada
-if [[ -f "${HS_DIR}/macspaces/config.lua.user" ]]; then
-  mv "${HS_DIR}/macspaces/config.lua.user" "${HS_DIR}/macspaces/config.lua"
-  ok "Tu config.lua personalizado fue preservado"
-fi
-
-# ── 5. Compilar helper Swift (cambio de navegador) ──────────
-
-info "Compilando set_browser..."
-if swiftc "${HS_DIR}/macspaces/set_browser.swift" -o "${HS_DIR}/set_browser" 2>/dev/null; then
-  ok "set_browser compilado"
+if command -v brew &>/dev/null; then
+  ok "disponible"
+  S_BREW="ok:disponible"
 else
-  warn "No se pudo compilar set_browser — el cambio de navegador no funcionará"
+  if $DRY; then
+    info "se instalaría"
+    S_BREW="ok:dry-run"
+  else
+    info "instalando..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    if [[ -f /opt/homebrew/bin/brew ]]; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -f /usr/local/bin/brew ]]; then
+      eval "$(/usr/local/bin/brew shellenv)"
+    fi
+    ok "instalado"
+    S_BREW="ok:instalado"
+  fi
 fi
 
-# ── 6. Permisos ──────────────────────────────────────────────
+# ── 3. Hammerspoon ───────────────────────────────────────────
 
-echo ""
-echo "╭──────────────────────────────────────────────────╮"
-echo "│  PERMISOS REQUERIDOS                             │"
-echo "│                                                  │"
-echo "│  macOS te pedirá permisos la primera vez que     │"
-echo "│  abras Hammerspoon. Debes habilitarlos en:       │"
-echo "│                                                  │"
-echo "│  Ajustes del Sistema → Privacidad y Seguridad    │"
-echo "│    → Accesibilidad → Hammerspoon ✓               │"
-echo "│    → Automatización → Hammerspoon ✓              │"
-echo "╰──────────────────────────────────────────────────╯"
-echo ""
+section "Hammerspoon"
 
-# ── 7. Lanzar Hammerspoon ────────────────────────────────────
+if brew list --cask hammerspoon &>/dev/null 2>&1 || [[ -d "/Applications/Hammerspoon.app" ]]; then
+  ok "disponible"
+  S_HAMMER="ok:disponible"
+else
+  if $DRY; then
+    info "se instalaría"
+    S_HAMMER="ok:dry-run"
+  else
+    info "instalando..."
+    brew install --cask hammerspoon
+    ok "instalado"
+    S_HAMMER="ok:instalado"
+  fi
+fi
 
-if pgrep -xq "Hammerspoon"; then
-  info "Recargando Hammerspoon..."
-  # hs CLI puede no estar instalado; usar AppleScript como fallback
+# ── 4. Archivos ──────────────────────────────────────────────
+
+section "Archivos"
+
+if [[ "$MODE" == "local" ]]; then
+  install_local
+else
+  install_remote
+fi
+
+# ── 5. Compilar helper Swift ─────────────────────────────────
+
+section "Helper Swift"
+
+SWIFT_SRC="${HS_DIR}/macspaces/set_browser.swift"
+SWIFT_BIN="${HS_DIR}/set_browser"
+
+if $DRY; then
+  info "se compilaría set_browser"
+  S_SWIFT="ok:dry-run"
+else
+  # En modo local, el source es un symlink — resolver para swiftc
+  local_src="$SWIFT_SRC"
+  [[ -L "$SWIFT_SRC" ]] && local_src="$(readlink "$SWIFT_SRC")"
+
+  if swiftc "$local_src" -o "$SWIFT_BIN" 2>/dev/null; then
+    ok "set_browser compilado"
+    S_SWIFT="ok:compilado"
+  else
+    warn "no se pudo compilar — el cambio de navegador no funcionará"
+    S_SWIFT="warn:falló compilación"
+  fi
+fi
+
+# ── 6. Lanzar Hammerspoon ───────────────────────────────────
+
+section "Hammerspoon"
+
+if $DRY; then
+  info "se lanzaría/recargaría"
+  S_LAUNCH="ok:dry-run"
+elif pgrep -xq "Hammerspoon"; then
   if command -v hs &>/dev/null; then
     hs -c "hs.reload()" 2>/dev/null || true
   else
     osascript -e 'tell application "Hammerspoon" to execute lua code "hs.reload()"' 2>/dev/null || true
   fi
-  ok "Hammerspoon recargado"
+  ok "recargado"
+  S_LAUNCH="ok:recargado"
 else
-  info "Abriendo Hammerspoon..."
   open -a Hammerspoon
-  ok "Hammerspoon iniciado — acepta los permisos cuando aparezcan"
+  ok "iniciado"
+  S_LAUNCH="ok:iniciado"
+fi
+
+# ── Resumen ──────────────────────────────────────────────────
+
+summary_line() {
+  local label="$1" state="$2"
+  local status="${state%%:*}" detail="${state#*:}"
+  local pad
+  pad=$(printf '%*s' $((14 - ${#label})) '')
+  case "$status" in
+    ok)   echo -e "  ${GREEN}✓${RESET}  ${label}${pad}${DIM}${detail}${RESET}" ;;
+    warn) echo -e "  ${YELLOW}⚠${RESET}  ${label}${pad}${YELLOW}${detail}${RESET}" ;;
+    fail) echo -e "  ${RED}✗${RESET}  ${label}${pad}${RED}${detail}${RESET}" ;;
+  esac
+}
+
+echo ""
+echo -e "${DIM}─────────────────────────────────────────────────${RESET}"
+summary_line "Xcode CLI"    "$S_XCODE"
+summary_line "Homebrew"     "$S_BREW"
+summary_line "Hammerspoon"  "$S_HAMMER"
+summary_line "Archivos"     "$S_FILES"
+summary_line "Swift helper" "$S_SWIFT"
+summary_line "Lanzamiento"  "$S_LAUNCH"
+echo -e "${DIM}─────────────────────────────────────────────────${RESET}"
+
+# Permisos — solo mostrar si es primera instalación
+if [[ "${S_HAMMER}" == *"instalado"* ]]; then
+  echo ""
+  echo -e "  ${BOLD}Permisos requeridos:${RESET}"
+  echo -e "  Ajustes del Sistema → Privacidad y Seguridad"
+  echo -e "    → Accesibilidad → Hammerspoon ✓"
+  echo -e "    → Automatización → Hammerspoon ✓"
 fi
 
 echo ""
-ok "macSpaces instalado. El ícono ⌘ aparecerá en tu barra de menú."

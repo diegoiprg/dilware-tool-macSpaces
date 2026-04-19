@@ -1,6 +1,6 @@
 # Gestor de entorno macOS — macSpaces
 
-![Versión](https://img.shields.io/badge/versión-v2.11.7-6366f1?style=flat-square)
+![Versión](https://img.shields.io/badge/versión-v2.11.8-6366f1?style=flat-square)
 ![Licencia](https://img.shields.io/badge/licencia-GPLv3-a855f7?style=flat-square)
 ![Plataforma](https://img.shields.io/badge/plataforma-macOS-222?style=flat-square&logo=apple&logoColor=white)
 
@@ -115,13 +115,25 @@ El proyecto está compuesto por los siguientes módulos Lua, cada uno con respon
 
 Un solo comando que instala todo: Xcode CLI Tools, Homebrew, Hammerspoon, archivos de configuración, helper Swift compilado, y lanza Hammerspoon listo para usar.
 
+El instalador detecta automáticamente cómo se ejecutó:
+
+**Desde un clon local** — crea symlinks (los cambios en el repo se reflejan al instante):
+
+```bash
+git clone https://github.com/diegoiprg/dilware-tool-macGestorEntorno.git
+cd dilware-tool-macGestorEntorno
+bash install.sh
+```
+
+**Remoto** — descarga los archivos directamente:
+
 > Ejecutar scripts remotos con `curl | bash` implica confiar en el contenido del repositorio. [Revisa el código](install.sh) antes de ejecutar.
 
 ```bash
 curl -sL https://raw.githubusercontent.com/diegoiprg/dilware-tool-macGestorEntorno/main/install.sh | bash
 ```
 
-El instalador preserva tu `config.lua` si ya tenías una configuración personalizada.
+Usa `--dry-run` para previsualizar sin aplicar cambios. El instalador preserva tu `config.lua` si ya tenías una configuración personalizada.
 
 Después de la instalación, macOS te pedirá permisos para Hammerspoon:
 - Ajustes del Sistema → Privacidad y Seguridad → Accesibilidad → Hammerspoon ✓

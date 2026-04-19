@@ -1,4 +1,4 @@
-# Guía de Configuración — macSpaces v2.11.7
+# Guía de Configuración — macSpaces v2.11.8
 
 Referencia completa de todos los parámetros de `~/.hammerspoon/macspaces/config.lua`.
 
