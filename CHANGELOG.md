@@ -2,6 +2,11 @@
 
 Registro de cambios del proyecto `dilware-tool-macGestorEntorno`.
 
+## [2.14.1] - 2026-04-19
+
+### Corregido
+- `macspaces/gemini-usage.sh`: CLIENT_SECRET reconstruido en runtime (`_CSP1`+`_CSP2`), no en texto plano. Restaurado `set -euo pipefail` y validación de `jq`/`python3`. Eliminada heurística de valores fabricados (`pct=81`, `pct=100`). Sincronizado con fuente canónica en `config/`.
+
 ## [2.14.0] - 2026-04-19
 
 ### Agregado
